@@ -14,7 +14,11 @@ class LofiWidget {
         this.volumeSlider = document.getElementById('volumeSlider');
         this.closeBtn = document.getElementById('closeBtn');
         this.vinylRecord = document.querySelector('.vinyl-record');
+        this.widget = document.getElementById('widget');
+        this.coverSection = document.querySelector('.cover-section');
+        this.infoSection = document.querySelector('.info-section');
         this.statusIndicator = this.createStatusIndicator();
+
 
         // 绑定事件
         this.bindEvents();
@@ -40,10 +44,13 @@ class LofiWidget {
             font-size: 11px;
             font-weight: 500;
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
             opacity: 0;
             transition: opacity 0.3s ease;
             pointer-events: none;
+            z-index: 1000;
+            box-sizing: border-box;
         `;
         document.body.appendChild(indicator);
         return indicator;
