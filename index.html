@@ -8,7 +8,7 @@
 </head>
 <body>
     <!-- 整个窗口可拖拽 -->
-    <div id="widget" class="widget">
+    <div id="widget" class="widget" data-focus-text="Today Focus: 0 min">
         <!-- 封面区域 -->
         <div class="cover-section">
             <div class="vinyl-record" id="playPauseBtn">
@@ -47,6 +47,30 @@
         <div class="focus-time-display">
             Today Focus: <span id="focusTime">0</span> min
         </div>
+
+        <!-- Mini模式切换按钮 -->
+        <button id="miniModeBtn" class="mini-mode-btn" title="切换到Mini模式">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 13H5v-2h14v2z"/>
+            </svg>
+        </button>
+
+        <!-- Mini模式播放按钮 -->
+        <button id="miniPlayBtn" class="mini-play-btn" title="播放/暂停">
+            <svg class="mini-play-icon" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+            <svg class="mini-pause-icon" viewBox="0 0 24 24">
+                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+            </svg>
+        </button>
+
+        <!-- Mini模式还原按钮 -->
+        <button id="miniExpandBtn" class="mini-expand-btn" title="还原">
+            <svg viewBox="0 0 24 24">
+                <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+            </svg>
+        </button>
 
         <!-- 关闭按钮 -->
         <button id="closeBtn" class="close-btn">

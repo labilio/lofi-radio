@@ -13,11 +13,16 @@ class LofiWidget {
         this.playPauseBtn = document.getElementById('playPauseBtn');
         this.volumeSlider = document.getElementById('volumeSlider');
         this.closeBtn = document.getElementById('closeBtn');
+        this.miniModeBtn = document.getElementById('miniModeBtn');
+        this.miniPlayBtn = document.getElementById('miniPlayBtn');
+        this.miniExpandBtn = document.getElementById('miniExpandBtn');
         this.vinylRecord = document.querySelector('.vinyl-record');
         this.widget = document.getElementById('widget');
         this.coverSection = document.querySelector('.cover-section');
         this.infoSection = document.querySelector('.info-section');
+        this.focusTimeDisplay = document.querySelector('.focus-time-display');
         this.statusIndicator = this.createStatusIndicator();
+        this.isMiniMode = false;
 
 
         // 绑定事件
@@ -26,6 +31,8 @@ class LofiWidget {
         // 初始化状态
         this.updatePlayButton();
         this.updateVolumeSlider();
+        // 初始化消息弹窗位置（普通模式）
+        this.adjustStatusIndicatorForMiniMode(false);
         this.showStatus('🎵 系统就绪', 'ready');
         setTimeout(() => this.hideStatus(), 2000);
 
@@ -98,6 +105,21 @@ class LofiWidget {
             this.setVolume(volume);
         });
 
+        // Mini模式切换按钮
+        this.miniModeBtn.addEventListener('click', () => {
+            this.toggleMiniMode();
+        });
+
+        // Mini模式播放按钮
+        this.miniPlayBtn.addEventListener('click', () => {
+            this.togglePlayPause();
+        });
+
+        // Mini模式还原按钮
+        this.miniExpandBtn.addEventListener('click', () => {
+            this.toggleMiniMode();
+        });
+
         // 关闭按钮
         this.closeBtn.addEventListener('click', () => {
             this.closeApp();
@@ -150,6 +172,55 @@ class LofiWidget {
         }
     }
 
+    toggleMiniMode() {
+        if (window.electronAPI && window.electronAPI.toggleMiniMode) {
+            // 先发送IPC消息切换窗口大小
+            window.electronAPI.toggleMiniMode();
+
+            // 延迟切换UI，确保窗口大小变化完成
+            setTimeout(() => {
+                this.isMiniMode = !this.isMiniMode;
+                this.updateMiniModeUI();
+            }, 100);
+        }
+    }
+
+    updateMiniModeUI() {
+        if (this.isMiniMode) {
+            // 进入Mini模式
+            this.widget.classList.add('mini-mode');
+            // 调整消息弹窗位置到mini胶囊下方
+            this.adjustStatusIndicatorForMiniMode(true);
+            this.showStatus('Mini模式', 'ready');
+            setTimeout(() => this.hideStatus(), 1500);
+        } else {
+            // 退出Mini模式
+            this.widget.classList.remove('mini-mode');
+            // 恢复消息弹窗到普通位置
+            this.adjustStatusIndicatorForMiniMode(false);
+            this.showStatus('普通模式', 'ready');
+            setTimeout(() => this.hideStatus(), 1500);
+        }
+        // 按钮状态会通过updatePlayButton自动更新
+    }
+
+    // 调整消息弹窗在mini模式下的位置
+    adjustStatusIndicatorForMiniMode(isMiniMode) {
+        if (isMiniMode) {
+            // Mini模式：胶囊下方，居中显示
+            this.statusIndicator.style.bottom = 'auto';
+            this.statusIndicator.style.top = '55px'; // 胶囊高度45px + 15px间距
+            this.statusIndicator.style.left = '12%';
+            this.statusIndicator.style.transform = 'translateX(-50%)';
+        } else {
+            // 普通模式：左下角
+            this.statusIndicator.style.bottom = '10px';
+            this.statusIndicator.style.top = 'auto';
+            this.statusIndicator.style.left = '10px';
+            this.statusIndicator.style.transform = 'none';
+        }
+    }
+
     closeApp() {
         if (window.lofiWidget) {
             window.lofiWidget.closeApp();
@@ -159,8 +230,16 @@ class LofiWidget {
     updatePlayButton() {
         if (this.isPlaying) {
             this.playPauseBtn.classList.add('playing');
+            // 只在mini模式下更新mini播放按钮状态
+            if (this.isMiniMode) {
+                this.miniPlayBtn.classList.add('playing');
+            }
         } else {
             this.playPauseBtn.classList.remove('playing');
+            // 只在mini模式下更新mini播放按钮状态
+            if (this.isMiniMode) {
+                this.miniPlayBtn.classList.remove('playing');
+            }
         }
     }
 

@@ -39,5 +39,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   // 关闭窗口
   closeWindow: () => {
     ipcRenderer.send('close-app');
+  },
+
+  // Mini模式切换
+  toggleMiniMode: () => {
+    ipcRenderer.send('toggle-mini-mode');
   }
 });

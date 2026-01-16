@@ -383,6 +383,159 @@ body, html {
     transform: rotate(-90deg);
 }
 
+/* Mini模式切换按钮 */
+.mini-mode-btn {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    top: 12px;
+    right: 46px; /* 在关闭按钮左侧，保持6px间距 */
+    width: 28px;
+    height: 28px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.mini-mode-btn:hover {
+    background: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.3);
+    transform: scale(1.05);
+}
+
+.mini-mode-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+}
+
+.mini-mode-btn:hover svg {
+    fill: rgba(255, 255, 255, 0.9);
+}
+
+/* Mini模式样式 */
+.widget.mini-mode {
+    width: 180px;
+    height: 45px;
+    border-radius: 25px; /* 胶囊形状 */
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    /* 去除所有阴影，只保留胶囊本体 */
+    box-shadow: none;
+}
+
+/* Mini模式隐藏元素 */
+.widget.mini-mode .cover-section,
+.widget.mini-mode .focus-time-display,
+.widget.mini-mode .mini-mode-btn,
+.widget.mini-mode .close-btn {
+    display: none;
+}
+
+/* Mini模式播放按钮 */
+.mini-play-btn {
+    -webkit-app-region: no-drag;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    display: none; /* 默认隐藏，只在mini模式下显示 */
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+/* Mini模式下显示播放按钮 */
+.widget.mini-mode .mini-play-btn {
+    display: flex;
+}
+
+.mini-play-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.mini-play-btn svg {
+    width: 12px;
+    height: 12px;
+    fill: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+/* Mini模式播放按钮状态 */
+.mini-play-btn.playing .mini-play-icon {
+    display: none;
+}
+
+.mini-play-btn:not(.playing) .mini-pause-icon {
+    display: none;
+}
+
+.mini-play-btn.playing .mini-pause-icon {
+    display: block;
+}
+
+/* Mini模式Focus计时器 */
+.widget.mini-mode::before {
+    content: attr(data-focus-text);
+    font-size: 16px;
+    color: rgba(255, 218, 185, 0.8);
+    font-weight: 500;
+    text-align: center;
+    flex: 1;
+    margin: 0 8px;
+    white-space: nowrap;
+}
+
+/* Mini模式还原按钮 */
+.mini-expand-btn {
+    -webkit-app-region: no-drag;
+    width: 20px;
+    height: 20px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    display: none; /* 默认隐藏，只在mini模式下显示 */
+    align-items: center;
+    justify-content: center;
+}
+
+/* Mini模式下显示还原按钮 */
+.widget.mini-mode .mini-expand-btn {
+    display: flex;
+}
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+.mini-expand-btn:hover {
+    background: rgba(59, 130, 246, 0.2);
+    transform: scale(1.1);
+}
+
+.mini-expand-btn svg {
+    width: 10px;
+    height: 10px;
+    fill: rgba(255, 255, 255, 0.8);
+}
+
 /* 播放状态视觉反馈 - 温暖lofi风格 */
 .vinyl-record.playing {
     filter:
@@ -453,6 +606,18 @@ body, html {
     }
 
     .close-btn svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .mini-mode-btn {
+        top: 10px;
+        right: 40px; /* 10px(close-btn right) + 24px(close-btn width) + 6px(间距) */
+        width: 24px;
+        height: 24px;
+    }
+
+    .mini-mode-btn svg {
         width: 12px;
         height: 12px;
     }

@@ -218,6 +218,23 @@ function createWindow() {
     app.quit();
   });
 
+  // Mini模式切换
+  ipcMain.on('toggle-mini-mode', () => {
+    const [currentWidth, currentHeight] = mainWindow.getSize();
+
+    if (currentWidth === 180 && currentHeight === 45) {
+      // 当前是Mini模式，切换回普通模式
+      mainWindow.setSize(300, 150);
+      mainWindow.center(); // 重新居中
+      console.log('Switched to normal mode');
+    } else {
+      // 当前是普通模式，切换到Mini模式
+      mainWindow.setSize(180, 45);
+      mainWindow.center(); // 重新居中
+      console.log('Switched to mini mode');
+    }
+  });
+
   // 处理来自音频窗口的状态更新
   ipcMain.on('audio-play-state-changed', (event, isPlaying) => {
     if (mainWindow && !mainWindow.isDestroyed()) {

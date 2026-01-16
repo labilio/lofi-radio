@@ -93,6 +93,9 @@ class FocusTimeManager {
             this.saveToStorage();
         });
 
+        // 监听Mini模式变化
+        this.observeMiniMode();
+
         // 每分钟检查一次日期（以防用户长时间运行）
         setInterval(() => {
             this.checkDateReset();
@@ -124,11 +127,40 @@ class FocusTimeManager {
         }
     }
 
+    // 监听Mini模式变化
+    observeMiniMode() {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    const widget = document.getElementById('widget');
+                    const isMiniMode = widget.classList.contains('mini-mode');
+
+                    // Mini模式的按钮显示/隐藏由CSS控制，无需额外处理
+                    console.log('Mini mode:', isMiniMode ? 'enabled' : 'disabled');
+                }
+            });
+        });
+
+        const widget = document.getElementById('widget');
+        if (widget) {
+            observer.observe(widget, {
+                attributes: true,
+                attributeFilter: ['class']
+            });
+        }
+    }
+
     // 更新显示
     updateDisplay() {
         const displayElement = document.getElementById('focusTime');
         if (displayElement) {
             displayElement.textContent = this.focusTime;
+        }
+
+        // 更新Mini模式的显示
+        const widget = document.getElementById('widget');
+        if (widget) {
+            widget.setAttribute('data-focus-text', `Focus: ${this.focusTime} min`);
         }
     }
 
