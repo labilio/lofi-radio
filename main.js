@@ -225,12 +225,12 @@ function createWindow() {
     if (currentWidth === 180 && currentHeight === 45) {
       // 当前是Mini模式，切换回普通模式
       mainWindow.setSize(300, 150);
-      mainWindow.center(); // 重新居中
+      // 保持当前位置，不重新居中
       console.log('Switched to normal mode');
     } else {
       // 当前是普通模式，切换到Mini模式
       mainWindow.setSize(180, 45);
-      mainWindow.center(); // 重新居中
+      // 保持当前位置，不重新居中
       console.log('Switched to mini mode');
     }
   });
