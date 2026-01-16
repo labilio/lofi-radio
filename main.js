@@ -61,47 +61,59 @@ function createWindow() {
   // 加载桌面小部件UI
   mainWindow.loadFile('index.html');
 
-  // 设置窗口位置到屏幕右下角
+  // 设置窗口位置到屏幕中央（确保可见）
   const { screen } = require('electron');
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width, height } = primaryDisplay.workAreaSize;
-  mainWindow.setPosition(width - 320, height - 170); // 留出一些边距
+  const windowWidth = 300;
+  const windowHeight = 150;
+
+  // 居中显示，确保可见
+  const x = Math.floor((width - windowWidth) / 2);
+  const y = Math.floor((height - windowHeight) / 2);
+  mainWindow.setPosition(x, y);
+
+  console.log(`Widget window positioned at: ${x}, ${y} (screen: ${width}x${height})`);
 
   // 监听来自UI的IPC消息
   const { ipcMain } = require('electron');
 
   ipcMain.on('toggle-play-pause', () => {
+    // 系统级控制：使用Electron的音频静音API
     if (audioWindow && !audioWindow.isDestroyed()) {
-      audioWindow.webContents.executeJavaScript(`
-        const videos = document.querySelectorAll('video');
-        if (videos.length > 0) {
-          const video = videos[0];
-          if (video.paused) {
-            video.play().then(() => {
-              console.log('Audio: Play triggered from widget');
-            }).catch(e => console.log('Audio: Play failed:', e));
-          } else {
-            video.pause();
-            console.log('Audio: Pause triggered from widget');
-          }
-        }
-      `).catch(err => console.error('Failed to toggle audio:', err));
+      const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
+      const shouldMute = !isCurrentlyMuted; // 切换静音状态
+
+      audioWindow.webContents.setAudioMuted(shouldMute);
+      console.log(`Audio: ${shouldMute ? 'MUTED' : 'UNMUTED'} via system API`);
+
+      // 通知UI更新状态
+      mainWindow.webContents.send('play-state-changed', !shouldMute);
     }
   });
 
   ipcMain.on('set-volume', (event, volume) => {
     if (audioWindow && !audioWindow.isDestroyed()) {
+      // 通过executeJavaScript设置B站视频的音量
       audioWindow.webContents.executeJavaScript(`
         const videos = document.querySelectorAll('video');
         videos.forEach(video => {
           video.volume = ${volume};
         });
-        console.log('Audio: Volume set to', ${volume});
-      `).catch(err => console.error('Failed to set volume:', err));
+        console.log('Volume set to:', ${volume});
+      `).catch(err => {
+        console.error('Failed to set volume:', err);
+      });
+
+      // 通知UI更新音量显示
+      mainWindow.webContents.send('volume-changed', volume);
     }
   });
 
   ipcMain.on('close-app', () => {
+    // #region agent log - IPC close-app received
+    console.log('IPC: close-app received, quitting application');
+    // #endregion
     app.quit();
   });
 
@@ -143,44 +155,46 @@ function createAudioWindow() {
     // 加载 Bilibili 直播间
     audioWindow.loadURL('https://live.bilibili.com/27519423?live_from=84001&spm_id_from=333.337.0.0');
 
-  // 当页面加载完成后，注入 JavaScript 代码
+  // 当页面加载完成后，使用轮询方式等待B站视频加载
   audioWindow.webContents.on('did-finish-load', () => {
-    setTimeout(() => {
+    console.log('Audio window: Page loaded, starting polling for video elements');
+
+    // 使用setInterval轮询等待B站视频标签加载
+    const pollInterval = setInterval(() => {
       audioWindow.webContents.executeJavaScript(`
-        // 取消视频静音并设置音量
         const videos = document.querySelectorAll('video');
-        videos.forEach(video => {
-          video.muted = false;
-          video.volume = 0.3; // 默认30%音量
-
-          // 监听播放状态变化
-          video.addEventListener('play', () => {
-            window.postMessage({ type: 'playStateChanged', isPlaying: true }, '*');
-          });
-
-          video.addEventListener('pause', () => {
-            window.postMessage({ type: 'playStateChanged', isPlaying: false }, '*');
-          });
-
-          video.addEventListener('volumechange', () => {
-            window.postMessage({ type: 'volumeChanged', volume: video.volume }, '*');
-          });
-
-          console.log('Audio window: video unmuted and volume set');
-        });
-
-        // 尝试自动播放
         if (videos.length > 0) {
-          videos[0].play().catch(e => {
-            console.log('Auto-play failed:', e);
+          // 找到视频元素，取消静音并设置音量
+          videos.forEach(video => {
+            video.muted = false;
+            video.volume = 0.3; // 默认30%音量
           });
-        }
 
-        console.log('Audio window: Page loaded');
-      `).catch(err => {
-        console.error('Audio window: Failed to execute JavaScript:', err);
+          // 尝试自动播放
+          videos[0].play().catch(e => {
+            console.log('Auto-play failed, but video is ready');
+          });
+
+          console.log('Audio window: Video elements found and initialized');
+          return true; // 成功找到视频
+        }
+        return false; // 还没找到视频
+      `).then((found) => {
+        if (found) {
+          console.log('Audio window: Video initialization complete, clearing poll interval');
+          clearInterval(pollInterval);
+        }
+      }).catch(err => {
+        console.error('Audio window: Polling error:', err);
+        clearInterval(pollInterval);
       });
-    }, 3000);
+    }, 1000); // 每秒检查一次
+
+    // 30秒后停止轮询，避免无限运行
+    setTimeout(() => {
+      clearInterval(pollInterval);
+      console.log('Audio window: Polling timeout after 30 seconds');
+    }, 30000);
   });
 
   // 监听来自音频窗口的消息
@@ -206,11 +220,13 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: '播放/暂停 (Alt+Q)',
+      label: '静音/取消静音 (Alt+Q)',
       click: () => {
-        // 通过IPC触发播放/暂停
-        const { ipcMain } = require('electron');
-        ipcMain.emit('toggle-play-pause');
+        if (audioWindow && !audioWindow.isDestroyed()) {
+          const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
+          audioWindow.webContents.setAudioMuted(!isCurrentlyMuted);
+          mainWindow.webContents.send('play-state-changed', isCurrentlyMuted);
+        }
       }
     },
     { type: 'separator' },
@@ -234,12 +250,17 @@ function createTray() {
 
 // 注册全局快捷键
 function registerGlobalShortcut() {
-  // 注册 Alt+Q 快捷键
+  // 注册 Alt+Q 快捷键 - 系统级静音控制
   const success = globalShortcut.register('Alt+Q', () => {
-    console.log('Alt+Q pressed - toggling play/pause');
-    // 通过IPC触发播放/暂停
-    const { ipcMain } = require('electron');
-    ipcMain.emit('toggle-play-pause');
+    console.log('Alt+Q pressed - toggling mute state');
+    if (audioWindow && !audioWindow.isDestroyed()) {
+      const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
+      audioWindow.webContents.setAudioMuted(!isCurrentlyMuted);
+      console.log(`Global shortcut: Audio ${!isCurrentlyMuted ? 'MUTED' : 'UNMUTED'}`);
+
+      // 通知UI更新状态
+      mainWindow.webContents.send('play-state-changed', isCurrentlyMuted);
+    }
   });
 
   if (success) {

@@ -1,4 +1,4 @@
-/* Lofi Radio Widget Styles */
+/* Lofi Radio Widget Styles - 深色主题 */
 
 * {
     margin: 0;
@@ -13,23 +13,23 @@ body {
     -webkit-user-select: none;
 }
 
-/* 整个小部件可拖拽 */
+/* 整个小部件可拖拽 - 深色毛玻璃效果 */
 .widget {
     width: 100vw;
     height: 100vh;
     border-radius: 15px;
     overflow: hidden;
 
-    /* 毛玻璃效果 */
+    /* 深色毛玻璃效果 */
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 
     /* 阴影效果 */
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 
-    /* 窗口拖拽 */
+    /* 窗口拖拽 - 确保整个区域可拖拽 */
     -webkit-app-region: drag;
     position: relative;
 }
@@ -113,21 +113,23 @@ body {
     );
 }
 
-/* 艺术家信息 */
+/* 艺术家信息 - 深色主题 */
 .artist-info {
     flex: 1;
-    color: rgba(255, 255, 255, 0.9);
+    color: rgba(255, 255, 255, 0.95);
 }
 
 .artist-name {
     font-size: 14px;
     font-weight: 600;
     margin-bottom: 2px;
+    color: rgba(255, 255, 255, 1);
 }
 
 .track-title {
     font-size: 12px;
-    opacity: 0.7;
+    opacity: 0.8;
+    color: rgba(255, 255, 255, 0.8);
 }
 
 /* 控制区域 */
@@ -139,7 +141,7 @@ body {
     gap: 15px;
 }
 
-/* 播放/暂停按钮 */
+/* 播放/暂停按钮 - 深色主题 */
 .control-btn {
     -webkit-app-region: no-drag; /* 按钮区域不可拖拽 */
     background: rgba(255, 255, 255, 0.1);
@@ -157,12 +159,18 @@ body {
 }
 
 .control-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
     transform: scale(1.05);
 }
 
 .control-btn:active {
     transform: scale(0.95);
+}
+
+.control-btn.playing {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
 }
 
 .control-btn svg {
@@ -171,7 +179,7 @@ body {
     fill: rgba(255, 255, 255, 0.9);
 }
 
-/* 音量控制 */
+/* 音量控制 - 深色主题 */
 .volume-control {
     display: flex;
     align-items: center;
@@ -182,7 +190,7 @@ body {
 .volume-icon {
     width: 18px;
     height: 18px;
-    fill: rgba(255, 255, 255, 0.7);
+    fill: rgba(255, 255, 255, 0.8);
 }
 
 .volume-slider {
@@ -202,14 +210,16 @@ body {
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.9);
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(0, 0, 0, 0.1);
 }
 
 .volume-slider::-webkit-slider-thumb:hover {
     background: #fff;
+    transform: scale(1.1);
 }
 
-/* 关闭按钮 */
+/* 关闭按钮 - 深色主题 */
 .close-btn {
     -webkit-app-region: no-drag;
     position: absolute;
@@ -218,7 +228,7 @@ body {
     width: 24px;
     height: 24px;
     background: rgba(255, 255, 255, 0.1);
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
@@ -230,7 +240,9 @@ body {
 }
 
 .close-btn:hover {
-    background: rgba(255, 0, 0, 0.3);
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: scale(1.1);
 }
 
 .close-btn svg {
@@ -241,6 +253,33 @@ body {
 
 .close-btn:hover svg {
     fill: rgba(255, 255, 255, 1);
+}
+
+/* 状态指示器 - 深色主题 */
+.status-indicator {
+    font-family: 'Segoe UI', sans-serif;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 加载动画 */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.status-indicator.loading {
+    animation: pulse 1.5s ease-in-out infinite;
+    background: rgba(59, 130, 246, 0.9);
+}
+
+/* 播放状态视觉反馈 */
+.control-btn.playing {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.4);
+}
+
+.vinyl-record.playing {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
 }
 
 /* 响应式调整 */
@@ -270,5 +309,10 @@ body {
 
     .volume-slider {
         width: 60px;
+    }
+
+    .status-indicator {
+        font-size: 10px;
+        padding: 3px 6px;
     }
 }
