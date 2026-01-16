@@ -31,8 +31,6 @@ class LofiWidget {
         // 初始化状态
         this.updatePlayButton();
         this.updateVolumeSlider();
-        // 初始化消息弹窗位置（普通模式）
-        this.adjustStatusIndicatorForMiniMode(false);
         this.showStatus('🎵 系统就绪', 'ready');
         setTimeout(() => this.hideStatus(), 2000);
 
@@ -76,6 +74,11 @@ class LofiWidget {
     }
 
     showStatus(message, type = 'info') {
+        // 在Mini模式下不显示任何消息通知
+        if (this.isMiniMode) {
+            return;
+        }
+
         const colors = {
             loading: 'rgba(255, 183, 77, 0.9)',  // 温暖橙色
             ready: 'rgba(255, 218, 185, 0.9)',   // 奶油色
@@ -128,9 +131,18 @@ class LofiWidget {
         // 监听来自主进程的状态变化
         if (window.lofiWidget) {
             window.lofiWidget.onPlayStateChange((isPlaying) => {
+                // 检查播放状态是否发生变化
+                const wasPlaying = this.isPlaying;
                 this.isPlaying = isPlaying;
                 this.updatePlayButton();
                 this.updateVinylAnimation();
+
+                // 如果播放状态发生变化（比如通过Alt+Q），显示状态消息
+                if (wasPlaying !== isPlaying && !this.isMiniMode) {
+                    const statusText = this.isPlaying ? '♪ 正在播放' : '🔇 已静音';
+                    this.showStatus(statusText, this.isPlaying ? 'ready' : 'error');
+                    setTimeout(() => this.hideStatus(), 1500);
+                }
             });
 
             window.lofiWidget.onVolumeChange((volume) => {
@@ -174,14 +186,24 @@ class LofiWidget {
 
     toggleMiniMode() {
         if (window.electronAPI && window.electronAPI.toggleMiniMode) {
-            // 先发送IPC消息切换窗口大小
-            window.electronAPI.toggleMiniMode();
+            // 添加淡出动画
+            this.widget.style.opacity = '0';
+            this.widget.style.transition = 'opacity 0.15s ease-out';
 
-            // 延迟切换UI，确保窗口大小变化完成
+            // 延迟发送IPC消息，等待淡出完成
             setTimeout(() => {
-                this.isMiniMode = !this.isMiniMode;
-                this.updateMiniModeUI();
-            }, 100);
+                // 先发送IPC消息切换窗口大小
+                window.electronAPI.toggleMiniMode();
+
+                // 等待窗口大小变化
+                setTimeout(() => {
+                    this.isMiniMode = !this.isMiniMode;
+                    this.updateMiniModeUI();
+
+                    // 淡入新界面
+                    this.widget.style.opacity = '1';
+                }, 150);
+            }, 150);
         }
     }
 
@@ -189,36 +211,13 @@ class LofiWidget {
         if (this.isMiniMode) {
             // 进入Mini模式
             this.widget.classList.add('mini-mode');
-            // 调整消息弹窗位置到mini胶囊下方
-            this.adjustStatusIndicatorForMiniMode(true);
-            this.showStatus('Mini模式', 'ready');
-            setTimeout(() => this.hideStatus(), 1500);
+            // Mini模式下不显示状态消息
         } else {
             // 退出Mini模式
             this.widget.classList.remove('mini-mode');
-            // 恢复消息弹窗到普通位置
-            this.adjustStatusIndicatorForMiniMode(false);
-            this.showStatus('普通模式', 'ready');
-            setTimeout(() => this.hideStatus(), 1500);
+            // 取消普通模式的消息提醒
         }
         // 按钮状态会通过updatePlayButton自动更新
-    }
-
-    // 调整消息弹窗在mini模式下的位置
-    adjustStatusIndicatorForMiniMode(isMiniMode) {
-        if (isMiniMode) {
-            // Mini模式：胶囊下方，居中显示
-            this.statusIndicator.style.bottom = 'auto';
-            this.statusIndicator.style.top = '55px'; // 胶囊高度45px + 15px间距
-            this.statusIndicator.style.left = '12%';
-            this.statusIndicator.style.transform = 'translateX(-50%)';
-        } else {
-            // 普通模式：左下角
-            this.statusIndicator.style.bottom = '10px';
-            this.statusIndicator.style.top = 'auto';
-            this.statusIndicator.style.left = '10px';
-            this.statusIndicator.style.transform = 'none';
-        }
     }
 
     closeApp() {

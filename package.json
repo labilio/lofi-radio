@@ -3,16 +3,56 @@
   "version": "1.0.0",
   "description": "隐形桌面音乐播放器 - Bilibili Lofi Radio",
   "main": "main.js",
+  "homepage": "./",
   "scripts": {
     "start": "electron . --disable-dev-tools",
     "dev": "electron .",
     "debug": "electron . --enable-logging --log-level=0",
-    "generate-icon": "node generate-icon.js"
+    "generate-icon": "node generate-icon.js",
+    "build": "electron-builder --win",
+    "dist": "electron-builder --win --publish=never",
+    "pack": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite"
   },
-  "keywords": ["electron", "music-player", "lofi", "bilibili"],
+  "keywords": [
+    "electron",
+    "music-player",
+    "lofi",
+    "bilibili"
+  ],
   "author": "",
   "license": "MIT",
-  "dependencies": {
-    "electron": "^28.0.0"
+  "devDependencies": {
+    "electron": "^40.0.0",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  },
+  "build": {
+    "appId": "com.lofi-radio-player.app",
+    "productName": "Lofi Radio Player",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "**/*",
+      "!release/**/*",
+      "!*.md",
+      "!build/**/*",
+      "!*.ps1",
+      "!*.bat"
+    ],
+    "win": {
+      "icon": "icon.ico",
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "installerHeaderIcon": "icon.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Lofi Radio Player"
+    }
   }
 }

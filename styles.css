@@ -29,6 +29,10 @@ body, html {
     box-sizing: border-box;
     /* 增加底部内边距，确保底部文字有足够的呼吸感 */
     padding-bottom: 14px;
+    /* 初始透明度 */
+    opacity: 1;
+    /* 过渡动画基础设置 */
+    transition: opacity 0.15s ease-out;
 
     /* 深靛蓝色磨砂玻璃效果 - 营造深夜专注氛围 */
     backdrop-filter: blur(28px) saturate(140%);
