@@ -12,18 +12,18 @@ body, html {
     user-select: none;
     -webkit-user-select: none;
     background: transparent;
-    /* 确保在所有平台上圆角正确渲染 */
-    -webkit-border-radius: 24px;
-    -moz-border-radius: 24px;
-    border-radius: 24px;
+    /* 确保在所有平台上圆角正确渲染 - 统一四个角 */
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 
 /* 整个小部件可拖拽 - 深靛蓝色磨砂玻璃效果 */
 .widget {
     width: 100vw;
     height: 100vh;
-    /* 统一四个角的弧度 - 所有角都是24px */
-    border-radius: 24px 24px 24px 24px;
+    /* 统一四个角的弧度 - 调整为20px以获得更好的视觉平衡 */
+    border-radius: 20px;
     overflow: hidden;
     position: relative;
     box-sizing: border-box;

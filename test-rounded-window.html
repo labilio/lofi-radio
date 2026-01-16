@@ -13,17 +13,18 @@
             height: 100vh;
             overflow: hidden;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            /* 确保圆角正确渲染 */
-            -webkit-border-radius: 24px;
-            -moz-border-radius: 24px;
-            border-radius: 24px;
+            /* 确保圆角正确渲染 - 统一四个角 */
+            -webkit-border-radius: 20px;
+            -moz-border-radius: 20px;
+            border-radius: 20px;
         }
 
         /* 测试用窗口容器 */
         .test-window {
             width: 100vw;
             height: 100vh;
-            border-radius: 24px;
+            /* 统一四个角的弧度 - 调整为20px */
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
@@ -32,8 +33,9 @@
             backdrop-filter: blur(28px) saturate(140%);
             -webkit-backdrop-filter: blur(28px) saturate(140%);
             background:
-                radial-gradient(circle at 30% 70%, rgba(31, 41, 55, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 70% 30%, rgba(17, 24, 39, 0.12) 0%, transparent 60%),
+                /* 调整为更对称的分布 */
+                radial-gradient(circle at 25% 75%, rgba(31, 41, 55, 0.15) 0%, transparent 60%),
+                radial-gradient(circle at 75% 25%, rgba(17, 24, 39, 0.12) 0%, transparent 60%),
                 radial-gradient(circle at 50% 50%, rgba(75, 85, 99, 0.08) 0%, transparent 80%),
                 linear-gradient(135deg,
                     rgba(30, 42, 59, 0.9) 0%,
@@ -153,7 +155,8 @@
                 这个窗口使用了 frame: false 和 hasShadow: false 的配置，<br>
                 由前端 CSS 自行绘制圆角和阴影效果。<br><br>
                 <strong>测试要点：</strong><br>
-                • 窗口应该有完美的圆角（24px）<br>
+                • 窗口应该有完美的统一圆角（20px）<br>
+                • 四个角弧度完全一致，无视觉差异<br>
                 • 阴影应该是圆角的，不应该有直角阴影<br>
                 • 可以拖拽窗口（除了按钮区域）<br>
                 • 按钮可以正常点击
@@ -171,6 +174,38 @@
     </div>
 
     <script>
+        // 根据传入的radius参数动态调整圆角
+        function applyTestRadius() {
+            const radius = window.testRadius || '20px';
+            const radiusValue = parseInt(radius);
+
+            // 更新body的border-radius
+            document.body.style.borderRadius = radius;
+
+            // 更新测试窗口容器的border-radius
+            const testWindow = document.querySelector('.test-window');
+            if (testWindow) {
+                testWindow.style.borderRadius = radius;
+            }
+
+            // 更新描述文本
+            const description = document.querySelector('.test-description');
+            if (description) {
+                description.innerHTML = `
+                    这个窗口使用了 frame: false 和 hasShadow: false 的配置，<br>
+                    由前端 CSS 自行绘制圆角和阴影效果。<br><br>
+                    <strong>测试要点：</strong><br>
+                    • 窗口应该有完美的统一圆角（${radius}）<br>
+                    • 四个角弧度完全一致，无视觉差异<br>
+                    • 阴影应该是圆角的，不应该有直角阴影<br>
+                    • 可以拖拽窗口（除了按钮区域）<br>
+                    • 按钮可以正常点击
+                `;
+            }
+
+            console.log(`Applied ${radius} border radius to test window`);
+        }
+
         // 关闭窗口
         function closeWindow() {
             if (window.electronAPI && window.electronAPI.closeWindow) {
@@ -192,17 +227,22 @@
 
             // 检测圆角支持
             const testEl = document.createElement('div');
-            testEl.style.borderRadius = '24px';
-            const supportsRounded = testEl.style.borderRadius === '24px';
+            const radius = window.testRadius || '20px';
+            testEl.style.borderRadius = radius;
+            const supportsRounded = testEl.style.borderRadius === radius;
             roundedSupport.textContent = supportsRounded ? '支持' : '不支持';
 
             info.style.display = 'block';
         }
 
-        // 自动显示平台信息（用于调试）
-        setTimeout(() => {
-            showPlatformInfo();
-        }, 1000);
+        // 页面加载完成后应用radius设置
+        document.addEventListener('DOMContentLoaded', function() {
+            // 等待一小段时间确保window.testRadius已经被设置
+            setTimeout(() => {
+                applyTestRadius();
+                showPlatformInfo();
+            }, 100);
+        });
     </script>
 </body>
 </html>

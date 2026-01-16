@@ -37,13 +37,20 @@ box-shadow:
 
 ## 测试方法
 
-运行 `run.bat` 并选择选项 2 来测试圆角窗口效果：
+运行 `run.bat` 并选择相应的选项来测试不同弧度的圆角窗口效果：
 
 ```
 Select mode:
 1. Normal Lofi Radio Widget
-2. Test Rounded Window Effect
+2. Test Rounded Window Effect (20px radius)
+3. Test Rounded Window Effect (16px radius)
+4. Test Rounded Window Effect (24px radius)
 ```
+
+**推荐弧度：**
+- 16px：更紧凑现代的圆角
+- 20px：平衡美观性和实用性（当前默认）
+- 24px：更大胆的圆角效果
 
 ## 兼容性
 
@@ -56,8 +63,10 @@ Select mode:
 1. **无边框窗口**：`frame: false`
 2. **透明背景**：`transparent: true`
 3. **禁用系统阴影**：`hasShadow: false`
-4. **自定义 CSS 阴影**：通过多层 box-shadow 创建圆角阴影效果
-5. **跨平台兼容**：使用 `-webkit-` 前缀确保 WebKit 兼容性
+4. **统一圆角设计**：所有四个角使用相同的弧度值，确保视觉一致性
+5. **自定义 CSS 阴影**：通过多层 box-shadow 创建圆角阴影效果
+6. **动态弧度测试**：支持运行时切换不同的圆角弧度进行比较
+7. **跨平台兼容**：使用 `-webkit-` 前缀确保 WebKit 兼容性
 
 ## 文件清单
 

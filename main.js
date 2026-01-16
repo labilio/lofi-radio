@@ -162,8 +162,17 @@ function createWindow() {
 
   // 加载对应的UI文件
   if (isTestMode) {
+    // 检查是否有radius参数
+    const radiusArg = process.argv.find(arg => arg.startsWith('--radius='));
+    const radius = radiusArg ? radiusArg.split('=')[1] : '20px';
+
     mainWindow.loadFile('test-rounded-window.html');
-    console.log('Loading test rounded window...');
+    console.log(`Loading test rounded window with ${radius} radius...`);
+
+    // 将radius值传递给渲染进程
+    mainWindow.webContents.on('did-finish-load', () => {
+      mainWindow.webContents.executeJavaScript(`window.testRadius = '${radius}';`);
+    });
   } else {
     mainWindow.loadFile('index.html');
     console.log('Loading normal lofi radio widget...');

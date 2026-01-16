@@ -5,10 +5,14 @@ echo ========================================
 echo.
 echo Select mode:
 echo 1. Normal Lofi Radio Widget
-echo 2. Test Rounded Window Effect
+echo 2. Test Rounded Window Effect (20px radius)
+echo 3. Test Rounded Window Effect (16px radius)
+echo 4. Test Rounded Window Effect (24px radius)
 echo.
-set /p choice="Enter your choice (1 or 2): "
+set /p choice="Enter your choice (1-4): "
 
+if "%choice%"=="4" goto :test_rounded_24px
+if "%choice%"=="3" goto :test_rounded_16px
 if "%choice%"=="2" goto :test_rounded
 if "%choice%"=="1" goto :normal_app
 goto :invalid_choice
@@ -106,6 +110,30 @@ echo Waiting 3 seconds for audio to load...
 timeout /t 3 /nobreak >nul
 echo.
 npm start
+goto :end
+
+:test_rounded_24px
+echo.
+echo ========================================
+echo Testing Rounded Window Effect (24px)...
+echo ========================================
+echo.
+echo The test window should appear with 24px border radius.
+echo Press Ctrl+C to close or click the X button.
+echo.
+node main.js --test-rounded --radius=24px
+goto :end
+
+:test_rounded_16px
+echo.
+echo ========================================
+echo Testing Rounded Window Effect (16px)...
+echo ========================================
+echo.
+echo The test window should appear with 16px border radius.
+echo Press Ctrl+C to close or click the X button.
+echo.
+node main.js --test-rounded --radius=16px
 goto :end
 
 :test_rounded
