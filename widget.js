@@ -22,7 +22,7 @@ class LofiWidget {
         // 初始化状态
         this.updatePlayButton();
         this.updateVolumeSlider();
-        this.showStatus('系统就绪', 'ready');
+        this.showStatus('🎵 系统就绪', 'ready');
         setTimeout(() => this.hideStatus(), 2000);
 
         console.log('Lofi Widget initialized');
@@ -51,15 +51,15 @@ class LofiWidget {
 
     showStatus(message, type = 'info') {
         const colors = {
-            loading: 'rgba(255, 165, 0, 0.9)', // 橙色
-            ready: 'rgba(34, 197, 94, 0.9)',   // 绿色
-            error: 'rgba(239, 68, 68, 0.9)',   // 红色
-            info: 'rgba(59, 130, 246, 0.9)'    // 蓝色
+            loading: 'rgba(255, 183, 77, 0.9)',  // 温暖橙色
+            ready: 'rgba(255, 218, 185, 0.9)',   // 奶油色
+            error: 'rgba(244, 67, 54, 0.9)',     // 柔和红色
+            info: 'rgba(139, 92, 46, 0.9)'       // 复古棕色
         };
 
         this.statusIndicator.textContent = message;
         this.statusIndicator.style.backgroundColor = colors[type] || colors.info;
-        this.statusIndicator.style.color = 'white';
+        this.statusIndicator.style.color = '#2a2a2a';
         this.statusIndicator.style.opacity = '1';
     }
 
@@ -108,12 +108,12 @@ class LofiWidget {
             this.updateVinylAnimation();
 
             // 显示状态反馈
-            const statusText = this.isPlaying ? '播放中' : '已静音';
+            const statusText = this.isPlaying ? '♪ 正在播放' : '🔇 已静音';
             this.showStatus(statusText, this.isPlaying ? 'ready' : 'error');
             setTimeout(() => this.hideStatus(), 1500);
 
-            // 更新按钮图标提示
-            this.playPauseBtn.title = this.isPlaying ? '点击静音' : '点击取消静音';
+            // 更新唱片提示
+            this.playPauseBtn.title = this.isPlaying ? '点击唱片暂停播放' : '点击唱片恢复播放';
         } else {
             this.showStatus('控制接口不可用', 'error');
             setTimeout(() => this.hideStatus(), 2000);
@@ -138,22 +138,17 @@ class LofiWidget {
     }
 
     updatePlayButton() {
-        const playIcon = this.playPauseBtn.querySelector('.play-icon');
-        const pauseIcon = this.playPauseBtn.querySelector('.pause-icon');
-
         if (this.isPlaying) {
-            playIcon.style.display = 'none';
-            pauseIcon.style.display = 'block';
             this.playPauseBtn.classList.add('playing');
         } else {
-            playIcon.style.display = 'block';
-            pauseIcon.style.display = 'none';
             this.playPauseBtn.classList.remove('playing');
         }
     }
 
     updateVolumeSlider() {
         this.volumeSlider.value = this.currentVolume;
+        // 更新CSS变量用于进度条显示
+        this.volumeSlider.style.setProperty('--value', `${this.currentVolume * 100}%`);
     }
 
     updateVinylAnimation() {
