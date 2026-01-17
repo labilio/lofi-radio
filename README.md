@@ -19,7 +19,7 @@
 
 | 普通模式 | Mini 模式 |
 | :---: | :---: |
-| <img src="桌面展示.png" width="300" /> | <img src="gemini展示.png" width="300" /> |
+| <img src="e:\lofi-radio\图片\桌面展示.png" width="300" /> | <img src="e:\lofi-radio\图片\gemini展示.png" width="300" /> |
 
 ---
 
@@ -29,7 +29,6 @@
 
 - 推特：[@SecretMaple24](https://twitter.com/SecretMaple24)
 - TG：https://t.me/SecretZ24
-- 我想做项目，有项目喊我
 
 ### 过往经历
 * **财务审计**：前大厂**财务计划分析**实习生 / 会计师事务所审计助理
