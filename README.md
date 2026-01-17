@@ -18,11 +18,14 @@
 
 ## 界面展示：普通模式 & Mini模式 自由切换！
 
-普通模式：
-![alt text](桌面展示.png)![alt text](<github 普通模式展示.jpg>)
+## 界面展示
 
-Mini模式：
-![alt text](e:\lofi-radio\图片\mini模式.jpg)![alt text](<github mini模式展示.jpg>)
+| 普通模式 (Normal Mode) | Mini 模式 (灵动岛风格) |
+| :---: | :---: |
+| <img src="./images/普通模式.jpg" width="400"/> | <img src="./images/mini模式.jpg" width="400"/> |
+| <img src="./images/github 普通模式展示.jpg" width="400"/> | <img src="./images/github mini模式展示.jpg" width="400"/> |
+| *黑胶唱片质感* | *小巧玲珑，不占空间* |
+
 
 ---
 ## 你为什么要做这个？为什么不用 QQ 音乐？
