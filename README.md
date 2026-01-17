@@ -19,10 +19,10 @@
 ## 界面展示：普通模式 & Mini模式 自由切换！
 
 普通模式：
-![alt text](桌面展示.png)
+![alt text](桌面展示.png)![alt text](<github 普通模式展示.jpg>)
 
 Mini模式：
-![alt text](gemini展示.png)
+![alt text](e:\lofi-radio\图片\mini模式.jpg)![alt text](<github mini模式展示.jpg>)
 
 ---
 ## 你为什么要做这个？为什么不用 QQ 音乐？
