@@ -17,9 +17,10 @@
 
 ## 界面展示
 
-| 普通模式 | Mini 模式 |
-| :---: | :---: |
-| <img src="e:\lofi-radio\图片\桌面展示.png" width="300" /> | <img src="e:\lofi-radio\图片\gemini展示.png" width="300" /> |
+普通模式：
+![alt text](桌面展示.png)
+Mini模式：
+![alt text](gemini展示.png)
 
 ---
 
