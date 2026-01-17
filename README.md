@@ -24,7 +24,7 @@ Mini模式：
 
 ---
 
-## 关于我 Secret  Web3 实习计划学员 (ETH Panda) 
+## 关于我 Secret： Web3 实习计划学员 (ETH Panda/LXDAO) 
 
 - 推特：[@SecretMaple24](https://twitter.com/SecretMaple24)
 - TG：https://t.me/SecretZ24
@@ -38,4 +38,4 @@ Mini模式：
  
 ---
 
-点个 **Star（收藏）** 支持一下，求求了求求了，谢谢谢谢谢谢蟹蟹
+点个 **Star（收藏）** 支持一下，谢谢谢谢谢谢蟹蟹
