@@ -124,7 +124,6 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
 * 做过10+数据分析项目，会写Python/SQL，现在在Dune练习Web3数分(SQL取数，搭Dashboard等）曾经参加过很多数学建模/数据分析高校竞赛
  
 ---
-###  macOS support - @0xBrick-Li  Web3 实习计划学员 (ETH Panda/LXDAO) 
 
 ## 开源贡献：
 
