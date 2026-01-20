@@ -10,8 +10,12 @@
     "debug": "electron . --enable-logging --log-level=0",
     "generate-icon": "node generate-icon.js",
     "build": "electron-builder --win",
+    "build:mac": "electron-builder --mac",
+    "build:all": "electron-builder --win --mac",
     "dist": "electron-builder --win --publish=never",
-    "pack": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite"
+    "dist:mac": "electron-builder --mac --publish=never",
+    "pack": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite",
+    "pack:mac": "electron-packager . --platform=darwin --arch=x64 --out=dist --overwrite"
   },
   "keywords": [
     "electron",
@@ -49,6 +53,36 @@
       "target": [
         "dir"
       ]
+    },
+    "mac": {
+      "icon": "icon.icns",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "category": "public.app-category.music",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ],
+      "window": {
+        "width": 540,
+        "height": 380
+      }
     },
     "nsis": {
       "oneClick": false,

@@ -4,6 +4,8 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
 
 不需要本地音源，不需要选歌单。下载后什么都不用做，直接打开即可收听使用
 
+> 💡 **macOS 用户提示**：首次打开可能需要右键点击应用 → 选择"打开"，或在系统设置中允许运行
+
 ---
 ![Lofi-Radio-gifshow](https://github.com/user-attachments/assets/ab515c7b-f294-4bf8-97ab-a099b0a68312)
 
@@ -21,8 +23,8 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
   - 普通模式：旋转发光黑胶唱片质感。
   - Mini 模式：仿灵动岛设计，小巧玲珑。
 - **桌面陪伴**：可以挂在屏幕上的任何地方，安静陪伴不打扰。
-**- 快捷键：ALT + Q 一键暂停/播放音乐**
-
+**- 快捷键：ALT + Q 一键暂停/播放音乐**  -- windows
+**- 快捷键：option + Q 一键暂停/播放音乐**  -- macOS
 ## 界面展示：普通模式 & Mini模式 自由切换！
 
 ## 界面展示
@@ -48,7 +50,8 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
 
 - **随时可控，而不是手动操作**
 
-  全局快捷键**ALT+Q**  一键暂停 / 恢复  
+  全局快捷键**ALT+Q**  一键暂停 / 恢复  -- windows
+  全局快捷键**option+Q**  一键暂停 / 恢复  -- macOS
   > 不需要切回浏览器 ，专注不中断
 
 >
@@ -118,5 +121,6 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
 * 做过10+数据分析项目，会写Python/SQL，现在在Dune练习Web3数分(SQL取数，搭Dashboard等）曾经参加过很多数学建模/数据分析高校竞赛
  
 ---
+###  macOS support - @0xBrick-Li  Web3 实习计划学员 (ETH Panda/LXDAO) 
 
 右上角点个 **Star（收藏）** 支持一下，谢谢谢谢谢谢蟹蟹。求求了
