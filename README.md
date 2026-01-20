@@ -53,8 +53,7 @@ https://github.com/labilio/lofi-radio/releases/tag/Lofi-Radio**
 
 - **随时可控，而不是手动操作**
 
-  全局快捷键**ALT+Q**  一键暂停 / 恢复  -- windows
-  全局快捷键**option+Q**  一键暂停 / 恢复  -- macOS
+  全局快捷键**ALT+Q**  一键暂停 / 恢复 （macOS为**option+Q** ）
   > 不需要切回浏览器 ，专注不中断
 
 >
