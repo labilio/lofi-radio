@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Audio Player</title>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+</head>
+<body>
+    <audio id="player" preload="auto"></audio>
+    <script>
+        const player = document.getElementById('player');
+        let hls = null;
+
+        // Handle errors
+        player.addEventListener('error', (e) => {
+            console.error('Audio Error:', player.error);
+            if (window.audioPlayer) {
+                let msg = 'Unknown error';
+                if (player.error) {
+                    switch (player.error.code) {
+                        case 1: msg = 'Aborted'; break;
+                        case 2: msg = 'Network error'; break;
+                        case 3: msg = 'Decode error'; break;
+                        case 4: msg = 'Source not supported'; break;
+                    }
+                }
+                window.audioPlayer.sendError(msg);
+            }
+        });
+
+        // Handle state changes
+        player.addEventListener('play', () => {
+            if (window.audioPlayer) window.audioPlayer.sendState({ playing: true });
+        });
+
+        player.addEventListener('pause', () => {
+            if (window.audioPlayer) window.audioPlayer.sendState({ playing: false });
+        });
+
+        // Initialize listeners via Preload API
+        if (window.audioPlayer) {
+            window.audioPlayer.onPlay(() => {
+                player.play().catch(e => console.error('Play failed:', e));
+            });
+
+            window.audioPlayer.onPause(() => {
+                player.pause();
+            });
+
+            window.audioPlayer.onSetVolume((volume) => {
+                player.volume = Math.max(0, Math.min(1, volume));
+            });
+
+            window.audioPlayer.onChangeStation((url) => {
+                const wasPlaying = !player.paused;
+                
+                // Destroy previous HLS instance if exists
+                if (hls) {
+                    hls.destroy();
+                    hls = null;
+                }
+
+                if (url.includes('.m3u8') || url.includes('.isml')) {
+                    // HLS Playback
+                    if (Hls.isSupported()) {
+                        hls = new Hls();
+                        hls.loadSource(url);
+                        hls.attachMedia(player);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                            if (wasPlaying) player.play().catch(e => console.error('HLS play failed:', e));
+                        });
+                        hls.on(Hls.Events.ERROR, function(event, data) {
+                             if (data.fatal) {
+                                switch (data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    console.log('fatal network error encountered, try to recover');
+                                    hls.startLoad();
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    console.log('fatal media error encountered, try to recover');
+                                    hls.recoverMediaError();
+                                    break;
+                                default:
+                                    // cannot recover
+                                    hls.destroy();
+                                    break;
+                                }
+                            }
+                        });
+                    } else if (player.canPlayType('application/vnd.apple.mpegurl')) {
+                        // Native HLS support (Safari)
+                        player.src = url;
+                        if (wasPlaying) player.play().catch(e => console.error('Native HLS play failed:', e));
+                    }
+                } else {
+                    // Standard Playback (MP3/AAC)
+                    player.src = url;
+                    if (wasPlaying) {
+                        player.play().catch(e => console.error('Play failed after switch:', e));
+                    } else {
+                        player.play().catch(e => console.error('Play failed after switch:', e));
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>

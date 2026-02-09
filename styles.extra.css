@@ -1,0 +1,263 @@
+/* Station List Button - Left Top */
+.station-list-btn {
+    -webkit-app-region: no-drag;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    padding: 0;
+    z-index: 200;
+}
+
+.station-list-btn svg {
+    width: 14px;
+    height: 14px;
+    fill: rgba(255, 255, 255, 0.6);
+    transition: all 0.3s ease;
+}
+
+.station-list-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.station-list-btn:hover svg {
+    fill: rgba(255, 255, 255, 0.95);
+}
+
+/* Hide Station List Button in Mini Mode */
+.widget.mini-mode .station-list-btn {
+    display: none;
+}
+
+/* Station List Panel - Slide Out Overlay */
+.station-list-panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: 100;
+    padding: 12px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.station-list-panel.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-left: 30px; /* Balance visually */
+}
+
+.panel-header h3 {
+    margin: 0;
+    color: rgba(255, 218, 185, 0.9);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.station-list-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+/* Custom Scrollbar */
+.station-list-container::-webkit-scrollbar {
+    width: 4px;
+}
+.station-list-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.02);
+}
+.station-list-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+.station-list-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.station-list-item {
+    padding: 8px 12px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.station-list-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.station-list-item.active {
+    background: rgba(255, 218, 185, 0.15);
+    color: rgba(255, 218, 185, 1);
+    font-weight: 500;
+}
+
+.station-category {
+    font-size: 10px;
+    opacity: 0.6;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+/* Hide Main Controls when List is Active */
+.cover-section, .focus-time-display {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.list-open .cover-section,
+.list-open .focus-time-display {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.95);
+}
+
+/* Normal Mode Controls */
+.normal-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 4px;
+    -webkit-app-region: no-drag;
+}
+
+.control-btn-small {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.control-btn-small:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+}
+
+.control-btn-small svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+
+/* Mini Mode Controls */
+.mini-controls {
+    display: none; /* Hidden by default */
+    align-items: center;
+    gap: 8px;
+    -webkit-app-region: no-drag;
+}
+
+.widget.mini-mode .mini-controls {
+    display: flex;
+}
+
+.mini-control-btn {
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 0;
+}
+
+.mini-control-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+.mini-control-btn svg {
+    width: 12px;
+    height: 12px;
+    fill: rgba(255, 255, 255, 0.8);
+    transition: all 0.3s ease;
+}
+
+/* Update Mini Mode Width */
+.widget.mini-mode {
+    width: 260px; /* Increased from 180px */
+}
+
+/* Adjust Mini Mode Layout */
+.widget.mini-mode::before {
+    /* Hide focus text in mini mode to make room for buttons, or show station name */
+    display: none; 
+}
+
+/* Show Station Name in Mini Mode */
+.widget.mini-mode .station-name-mini {
+    display: block;
+    color: rgba(255, 218, 185, 0.9);
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    margin: 0 10px;
+    text-align: center;
+    pointer-events: none;
+}
+
+/* Hide mini play button that was direct child (moved to .mini-controls) */
+.widget.mini-mode > .mini-play-btn {
+    display: none;
+}

@@ -1,7 +1,31 @@
-const { app, BrowserWindow, Tray, Menu, globalShortcut } = require('electron');
+const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { exec } = require('child_process');
+
+// 配置文件路径
+const configPath = path.join(app.getPath('userData'), 'config.json');
+
+// 保存配置
+function saveConfig(config) {
+  try {
+    fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  } catch (e) {
+    console.error('Failed to save config:', e);
+  }
+}
+
+// 加载配置
+function loadConfig() {
+  try {
+    if (fs.existsSync(configPath)) {
+      return JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    }
+  } catch (e) {
+    console.error('Failed to load config:', e);
+  }
+  return { lastStationIndex: 0 };
+}
+
 
 // 添加全局错误处理
 process.on('uncaughtException', (error) => {
@@ -38,81 +62,12 @@ function getIconPath() {
   return null;
 }
 
-// 设置应用程序音量的函数（通过控制视频元素的 volume）
+// 设置应用程序音量的函数
 function setApplicationVolume(volume) {
-  // volume 范围: 0.0 - 1.0
   if (!audioWindow || audioWindow.isDestroyed()) {
     return;
   }
-
-  // 通过 executeJavaScript 设置视频元素的 volume
-  audioWindow.webContents.executeJavaScript(`
-    (function() {
-      const videos = document.querySelectorAll('video');
-      if (videos.length === 0) {
-        return { success: false, reason: 'no_videos' };
-      }
-
-      let setCount = 0;
-      videos.forEach((video) => {
-        try {
-          video.volume = ${volume};
-          setCount++;
-        } catch (e) {
-          console.error('Failed to set volume:', e);
-        }
-      });
-
-      return { success: setCount > 0, count: setCount };
-    })();
-  `).then((result) => {
-    if (result && result.success) {
-      // 通知UI更新音量显示
-      mainWindow.webContents.send('volume-changed', volume);
-    } else {
-      // 如果失败，使用轮询方式重试
-      retrySetVolume(volume, 5);
-    }
-  }).catch(err => {
-    console.error('Failed to set volume:', err);
-    // 重试
-    retrySetVolume(volume, 5);
-  });
-}
-
-// 重试设置音量的函数
-function retrySetVolume(volume, maxRetries) {
-  let retries = 0;
-  const retryInterval = setInterval(() => {
-    retries++;
-
-    if (!audioWindow || audioWindow.isDestroyed()) {
-      clearInterval(retryInterval);
-      return;
-    }
-
-    audioWindow.webContents.executeJavaScript(`
-      const videos = document.querySelectorAll('video');
-      if (videos.length > 0) {
-        videos.forEach(video => {
-          video.volume = ${volume};
-        });
-        return true;
-      }
-      return false;
-    `).then((success) => {
-      if (success) {
-        clearInterval(retryInterval);
-        mainWindow.webContents.send('volume-changed', volume);
-      } else if (retries >= maxRetries) {
-        clearInterval(retryInterval);
-      }
-    }).catch(err => {
-      if (retries >= maxRetries) {
-        clearInterval(retryInterval);
-      }
-    });
-  }, 1000); // 每秒重试一次
+  audioWindow.webContents.send('audio-command-volume', volume);
 }
 
 function createWindow() {
@@ -196,22 +151,51 @@ function createWindow() {
   const { ipcMain } = require('electron');
 
   ipcMain.on('toggle-play-pause', () => {
-    // 系统级控制：使用Electron的音频静音API
     if (audioWindow && !audioWindow.isDestroyed()) {
-      const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
-      const shouldMute = !isCurrentlyMuted; // 切换静音状态
-
-      audioWindow.webContents.setAudioMuted(shouldMute);
-      console.log(`Audio: ${shouldMute ? 'MUTED' : 'UNMUTED'} via system API`);
-
-      // 通知UI更新状态
-      mainWindow.webContents.send('play-state-changed', !shouldMute);
+      if (isPlaying) {
+        audioWindow.webContents.send('audio-command-pause');
+      } else {
+        audioWindow.webContents.send('audio-command-play');
+      }
     }
   });
 
   ipcMain.on('set-volume', (event, volume) => {
     // 使用新的音量控制函数
     setApplicationVolume(volume);
+  });
+  
+  ipcMain.on('get-stations', (event) => {
+    event.reply('stations-list', stations);
+    if (stations.length > 0) {
+      event.reply('station-changed', stations[currentStationIndex], currentStationIndex);
+    }
+  });
+
+  ipcMain.on('change-station', (event, index) => {
+    playStation(index);
+  });
+  
+  ipcMain.on('prev-station', () => {
+    let newIndex = currentStationIndex - 1;
+    if (newIndex < 0) newIndex = stations.length - 1;
+    playStation(newIndex);
+  });
+  
+  ipcMain.on('next-station', () => {
+    let newIndex = currentStationIndex + 1;
+    if (newIndex >= stations.length) newIndex = 0;
+    playStation(newIndex);
+  });
+  
+  ipcMain.on('random-station', () => {
+    if (stations.length > 1) {
+      let newIndex = currentStationIndex;
+      while (newIndex === currentStationIndex) {
+        newIndex = Math.floor(Math.random() * stations.length);
+      }
+      playStation(newIndex);
+    }
   });
 
   ipcMain.on('close-app', () => {
@@ -234,16 +218,17 @@ function createWindow() {
   });
 
   // 处理来自音频窗口的状态更新
-  ipcMain.on('audio-play-state-changed', (event, isPlaying) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('play-state-changed', isPlaying);
+  ipcMain.on('audio-state-update', (event, state) => {
+    if (state.playing !== undefined) {
+      isPlaying = state.playing;
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('play-state-changed', isPlaying);
+      }
     }
   });
-
-  ipcMain.on('audio-volume-changed', (event, volume) => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('volume-changed', volume);
-    }
+  
+  ipcMain.on('audio-error', (event, error) => {
+    console.error('Audio Error:', error);
   });
 
   // 当窗口被关闭，这个事件会被触发
@@ -255,14 +240,12 @@ function createWindow() {
 // 创建隐藏的音频窗口
 function createAudioWindow() {
   try {
-    // 获取图标路径
     const iconPath = getIconPath();
-
     audioWindow = new BrowserWindow({
-      width: 1200,
-      height: 800,
-      show: false, // 完全隐藏
-      icon: iconPath, // 设置窗口图标
+      width: 400,
+      height: 300,
+      show: false, // 隐藏
+      icon: iconPath,
       webPreferences: {
         nodeIntegration: false,
         contextIsolation: true,
@@ -272,62 +255,70 @@ function createAudioWindow() {
       skipTaskbar: true
     });
 
-    // 加载 Bilibili 直播间
-    audioWindow.loadURL('https://live.bilibili.com/27519423?live_from=84001&spm_id_from=333.337.0.0');
+    audioWindow.loadFile('audio.html');
 
-  // 当页面加载完成后，使用轮询方式等待B站视频加载
-  audioWindow.webContents.on('did-finish-load', () => {
-    console.log('Audio window: Page loaded, starting polling for video elements');
-
-    // 使用setInterval轮询等待B站视频标签加载
-    const pollInterval = setInterval(() => {
-      audioWindow.webContents.executeJavaScript(`
-        const videos = document.querySelectorAll('video');
-        if (videos.length > 0) {
-          // 找到视频元素，取消静音并设置音量
-          videos.forEach(video => {
-            video.muted = false;
-            video.volume = 0.3; // 默认30%音量
-          });
-
-          // 尝试自动播放
-          videos[0].play().catch(e => {
-            console.log('Auto-play failed, but video is ready');
-          });
-
-          console.log('Audio window: Video elements found and initialized');
-          return true; // 成功找到视频
-        }
-        return false; // 还没找到视频
-      `).then((found) => {
-        if (found) {
-          console.log('Audio window: Video initialization complete, clearing poll interval');
-          clearInterval(pollInterval);
-        }
-      }).catch(err => {
-        console.error('Audio window: Polling error:', err);
-        clearInterval(pollInterval);
-      });
-    }, 1000); // 每秒检查一次
-
-    // 30秒后停止轮询，避免无限运行
-    setTimeout(() => {
-      clearInterval(pollInterval);
-      console.log('Audio window: Polling timeout after 30 seconds');
-    }, 30000);
-  });
-
-  // 监听来自音频窗口的消息
-  audioWindow.webContents.on('console-message', (event, level, message) => {
-    if (message.includes('playStateChanged') || message.includes('volumeChanged')) {
-      // 这里可以处理状态变化的通知
-      console.log('Audio status:', message);
-    }
-  });
+    audioWindow.webContents.on('did-finish-load', () => {
+      console.log('Audio window loaded');
+      // Load initial station
+      loadStations();
+    });
 
     console.log('Audio window created successfully');
   } catch (e) {
     console.error('Failed to create audio window:', e);
+  }
+}
+
+let stations = [];
+let currentStationIndex = 0;
+let isPlaying = false;
+
+function loadStations() {
+  try {
+    const stationsPath = path.join(__dirname, 'stations.json');
+    if (fs.existsSync(stationsPath)) {
+      const data = fs.readFileSync(stationsPath, 'utf8');
+      stations = JSON.parse(data);
+      console.log(`Loaded ${stations.length} stations`);
+      
+      // Load user config
+      const config = loadConfig();
+      let startIndex = config.lastStationIndex || 0;
+      
+      // Validate index
+      if (startIndex < 0 || startIndex >= stations.length) {
+        startIndex = 0;
+      }
+
+      // Load default station
+      if (stations.length > 0) {
+        playStation(startIndex);
+      }
+    } else {
+      console.error('stations.json not found');
+    }
+  } catch (e) {
+    console.error('Failed to load stations:', e);
+  }
+}
+
+function playStation(index) {
+  if (index >= 0 && index < stations.length) {
+    currentStationIndex = index;
+    const station = stations[index];
+    
+    // Save to config
+    saveConfig({ lastStationIndex: currentStationIndex });
+
+    if (audioWindow && !audioWindow.isDestroyed()) {
+      console.log(`Playing station: ${station.name}`);
+      audioWindow.webContents.send('audio-command-station', station.url);
+      
+      // Notify UI
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('station-changed', station, currentStationIndex);
+      }
+    }
   }
 }
 
@@ -356,12 +347,14 @@ function createTray() {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: '静音/取消静音 (Alt+Q)',
+      label: '播放/暂停 (Alt+Q)',
       click: () => {
         if (audioWindow && !audioWindow.isDestroyed()) {
-          const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
-          audioWindow.webContents.setAudioMuted(!isCurrentlyMuted);
-          mainWindow.webContents.send('play-state-changed', isCurrentlyMuted);
+          if (isPlaying) {
+            audioWindow.webContents.send('audio-command-pause');
+          } else {
+            audioWindow.webContents.send('audio-command-play');
+          }
         }
       }
     },
@@ -388,14 +381,13 @@ function createTray() {
 function registerGlobalShortcut() {
   // 注册 Alt+Q 快捷键 - 系统级静音控制
   const success = globalShortcut.register('Alt+Q', () => {
-    console.log('Alt+Q pressed - toggling mute state');
+    console.log('Alt+Q pressed - toggling play/pause state');
     if (audioWindow && !audioWindow.isDestroyed()) {
-      const isCurrentlyMuted = audioWindow.webContents.isAudioMuted();
-      audioWindow.webContents.setAudioMuted(!isCurrentlyMuted);
-      console.log(`Global shortcut: Audio ${!isCurrentlyMuted ? 'MUTED' : 'UNMUTED'}`);
-
-      // 通知UI更新状态
-      mainWindow.webContents.send('play-state-changed', isCurrentlyMuted);
+      if (isPlaying) {
+        audioWindow.webContents.send('audio-command-pause');
+      } else {
+        audioWindow.webContents.send('audio-command-play');
+      }
     }
   });
 

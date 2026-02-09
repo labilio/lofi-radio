@@ -31,6 +31,21 @@ contextBridge.exposeInMainWorld('lofiWidget', {
     ipcRenderer.on('volume-changed', (event, volume) => {
       callback(volume);
     });
+  },
+
+  // 电台控制 API
+  getStations: () => ipcRenderer.send('get-stations'),
+  changeStation: (index) => ipcRenderer.send('change-station', index),
+  prevStation: () => ipcRenderer.send('prev-station'),
+  nextStation: () => ipcRenderer.send('next-station'),
+  randomStation: () => ipcRenderer.send('random-station'),
+  
+  onStationsList: (callback) => {
+    ipcRenderer.on('stations-list', (event, stations) => callback(stations));
+  },
+  
+  onStationChanged: (callback) => {
+    ipcRenderer.on('station-changed', (event, station, index) => callback(station, index));
   }
 });
 
@@ -45,4 +60,14 @@ contextBridge.exposeInMainWorld('electronAPI', {
   toggleMiniMode: () => {
     ipcRenderer.send('toggle-mini-mode');
   }
+});
+
+// 音频窗口专用API
+contextBridge.exposeInMainWorld('audioPlayer', {
+  onPlay: (callback) => ipcRenderer.on('audio-command-play', (event) => callback()),
+  onPause: (callback) => ipcRenderer.on('audio-command-pause', (event) => callback()),
+  onSetVolume: (callback) => ipcRenderer.on('audio-command-volume', (event, volume) => callback(volume)),
+  onChangeStation: (callback) => ipcRenderer.on('audio-command-station', (event, url) => callback(url)),
+  sendState: (state) => ipcRenderer.send('audio-state-update', state),
+  sendError: (error) => ipcRenderer.send('audio-error', error)
 });

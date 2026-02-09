@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Lofi Girl",
+    "category": "Lo-Fi",
+    "url": "https://play.streamafrica.net/lofiradio",
+    "type": "mp3"
+  },
+  {
+    "name": "ChillSky",
+    "category": "Lo-Fi",
+    "url": "http://chill.radioca.st/stream",
+    "type": "mp3"
+  },
+  {
+    "name": "SomaFM - Groove Salad",
+    "category": "Chill",
+    "url": "https://ice1.somafm.com/groovesalad-128-mp3",
+    "type": "mp3"
+  },
+  {
+    "name": "Ambient Sleeping Pill",
+    "category": "Chill",
+    "url": "http://radio.stereoscenic.com/asp-s",
+    "type": "mp3"
+  },
+  {
+    "name": "Radio Paradise",
+    "category": "Chill",
+    "url": "https://stream.radioparadise.com/mellow-128",
+    "type": "mp3"
+  },
+  {
+    "name": "Jazz Groove",
+    "category": "Jazz",
+    "url": "http://west-mp3-128.streamthejazzgroove.com/stream",
+    "type": "mp3"
+  },
+  {
+    "name": "SmoothJazz.com",
+    "category": "Jazz",
+    "url": "http://smoothjazz.cdnstream1.com/2585_128.mp3",
+    "type": "mp3"
+  },
+  {
+    "name": "Radio Swiss Classic",
+    "category": "Classical",
+    "url": "http://stream.srg-ssr.ch/m/rsc_de/mp3_128",
+    "type": "mp3"
+  },
+  {
+    "name": "BBC Radio 3",
+    "category": "Classical",
+    "url": "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio=320000.m3u8",
+    "type": "m3u8"
+  },
+  {
+    "name": "KEXP",
+    "category": "Rock/Indie",
+    "url": "https://kexp-mp3-128.streamguys1.com/kexp128.mp3",
+    "type": "mp3"
+  },
+  {
+    "name": "SomaFM - Drone Zone",
+    "category": "Chill",
+    "url": "https://ice1.somafm.com/dronezone-128-mp3",
+    "type": "mp3"
+  }
+]

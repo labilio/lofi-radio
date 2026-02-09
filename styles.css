@@ -329,15 +329,19 @@ body, html {
 
 /* 今日专注时长显示 */
 .focus-time-display {
+    position: absolute;
+    bottom: 6px;
+    width: 100%;
     text-align: center;
-    margin-top: 0px; /* 进一步减少上方空白，营造更紧凑的视觉流 */
-    font-size: 12px;
+    margin-top: 0;
+    font-size: 11px;
     color: rgba(248, 250, 252, 0.6); /* 半透明米白色 */
     font-weight: 400;
     letter-spacing: 0.5px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     /* 确保不影响拖拽 - 只设置pointer-events，保留拖拽功能 */
     pointer-events: none; /* 不响应鼠标事件，保持拖拽 */
+    z-index: 50;
 }
 
 .focus-time-display #focusTime {
@@ -518,15 +522,14 @@ body, html {
     display: none; /* 默认隐藏，只在mini模式下显示 */
     align-items: center;
     justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 /* Mini模式下显示还原按钮 */
 .widget.mini-mode .mini-expand-btn {
     display: flex;
-}
-    transition: all 0.3s ease;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
 }
 
 .mini-expand-btn:hover {
@@ -598,31 +601,5 @@ body, html {
 
     .volume-control {
         padding: 6px 10px;
-        gap: 10px;
-        max-width: 150px;
-    }
-
-    .close-btn {
-        top: 10px;
-        right: 10px;
-        width: 24px;
-        height: 24px;
-    }
-
-    .close-btn svg {
-        width: 12px;
-        height: 12px;
-    }
-
-    .mini-mode-btn {
-        top: 10px;
-        right: 40px; /* 10px(close-btn right) + 24px(close-btn width) + 6px(间距) */
-        width: 24px;
-        height: 24px;
-    }
-
-    .mini-mode-btn svg {
-        width: 12px;
-        height: 12px;
     }
 }

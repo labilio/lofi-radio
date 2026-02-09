@@ -16,6 +16,23 @@ class LofiWidget {
         this.miniModeBtn = document.getElementById('miniModeBtn');
         this.miniPlayBtn = document.getElementById('miniPlayBtn');
         this.miniExpandBtn = document.getElementById('miniExpandBtn');
+        
+        // 新增控件
+        this.stationListBtn = document.getElementById('stationListBtn');
+        this.stationListPanel = document.getElementById('stationListPanel');
+        this.stationListUl = document.getElementById('stationListUl');
+        this.stationTitle = document.getElementById('stationTitle');
+        
+        // Mini模式控件
+        this.miniPrevBtn = document.getElementById('miniPrevBtn');
+        this.miniNextBtn = document.getElementById('miniNextBtn');
+        this.miniRandomBtn = document.getElementById('miniRandomBtn');
+
+        // 普通模式控件
+        this.normalPrevBtn = document.getElementById('normalPrevBtn');
+        this.normalNextBtn = document.getElementById('normalNextBtn');
+        this.normalRandomBtn = document.getElementById('normalRandomBtn');
+
         this.vinylRecord = document.querySelector('.vinyl-record');
         this.widget = document.getElementById('widget');
         this.coverSection = document.querySelector('.cover-section');
@@ -27,6 +44,11 @@ class LofiWidget {
 
         // 绑定事件
         this.bindEvents();
+
+        // 请求电台列表
+        if (window.lofiWidget && window.lofiWidget.getStations) {
+            window.lofiWidget.getStations();
+        }
 
         // 初始化状态
         this.updatePlayButton();
@@ -149,6 +171,167 @@ class LofiWidget {
                 this.currentVolume = volume;
                 this.updateVolumeSlider();
             });
+
+            // 监听电台列表
+            if (window.lofiWidget.onStationsList) {
+                window.lofiWidget.onStationsList((stations) => {
+                    this.updateStationList(stations);
+                });
+            }
+
+            // 监听电台变更
+            if (window.lofiWidget.onStationChanged) {
+                window.lofiWidget.onStationChanged((station, index) => {
+                    this.updateCurrentStation(station, index);
+                });
+            }
+        }
+        
+        // 电台列表按钮 (切换面板)
+        if (this.stationListBtn) {
+            this.stationListBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // 防止冒泡
+                this.toggleStationList();
+            });
+        }
+        
+        // 点击外部关闭列表
+        document.addEventListener('click', (e) => {
+            if (this.isStationListOpen && 
+                !this.stationListPanel.contains(e.target) && 
+                e.target !== this.stationListBtn) {
+                this.toggleStationList(false);
+            }
+        });
+
+        // Mini模式按键事件
+        if (this.miniPrevBtn) {
+            this.miniPrevBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.prevStation) {
+                    window.lofiWidget.prevStation();
+                }
+            });
+        }
+
+        if (this.miniNextBtn) {
+            this.miniNextBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.nextStation) {
+                    window.lofiWidget.nextStation();
+                }
+            });
+        }
+
+        if (this.miniRandomBtn) {
+            this.miniRandomBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.randomStation) {
+                    window.lofiWidget.randomStation();
+                }
+            });
+        }
+
+        // 普通模式按键事件
+        if (this.normalPrevBtn) {
+            this.normalPrevBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.prevStation) {
+                    window.lofiWidget.prevStation();
+                }
+            });
+        }
+
+        if (this.normalNextBtn) {
+            this.normalNextBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.nextStation) {
+                    window.lofiWidget.nextStation();
+                }
+            });
+        }
+
+        if (this.normalRandomBtn) {
+            this.normalRandomBtn.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.randomStation) {
+                    window.lofiWidget.randomStation();
+                }
+            });
+        }
+    }
+
+    toggleStationList(forceState = null) {
+        if (forceState !== null) {
+            this.isStationListOpen = forceState;
+        } else {
+            this.isStationListOpen = !this.isStationListOpen;
+        }
+
+        if (this.isStationListOpen) {
+            this.stationListPanel.classList.add('active');
+            this.widget.classList.add('list-open');
+            
+            // 检查列表是否为空，如果为空则尝试重新获取
+            if (this.stationListUl && this.stationListUl.children.length === 0) {
+                console.log('Station list is empty, requesting stations...');
+                if (window.lofiWidget && window.lofiWidget.getStations) {
+                    window.lofiWidget.getStations();
+                }
+            }
+        } else {
+            this.stationListPanel.classList.remove('active');
+            this.widget.classList.remove('list-open');
+        }
+    }
+
+    updateStationList(stations) {
+        if (!this.stationListUl) return;
+        
+        this.stationListUl.innerHTML = '';
+        stations.forEach((station, index) => {
+            const li = document.createElement('li');
+            li.className = 'station-list-item';
+            li.dataset.index = index;
+            
+            // 内容结构
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = station.name;
+            
+            const categorySpan = document.createElement('span');
+            categorySpan.className = 'station-category';
+            categorySpan.textContent = station.category;
+            
+            li.appendChild(nameSpan);
+            li.appendChild(categorySpan);
+            
+            // 点击事件
+            li.addEventListener('click', () => {
+                if (window.lofiWidget && window.lofiWidget.changeStation) {
+                    window.lofiWidget.changeStation(index);
+                    this.toggleStationList(false); // 选择后关闭列表
+                }
+            });
+            
+            this.stationListUl.appendChild(li);
+        });
+    }
+
+    updateCurrentStation(station, index) {
+        // 更新列表选中状态
+        if (this.stationListUl) {
+            const items = this.stationListUl.querySelectorAll('.station-list-item');
+            items.forEach(item => item.classList.remove('active'));
+            if (items[index]) {
+                items[index].classList.add('active');
+                // 滚动到选中项 (可选)
+                // items[index].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+            }
+        }
+        
+        // 更新标题
+        if (this.stationTitle) {
+            this.stationTitle.textContent = station.name;
+        }
+
+        // 显示切换提示
+        if (!this.isMiniMode) {
+            this.showStatus(`正在播放: ${station.name}`, 'ready');
+            setTimeout(() => this.hideStatus(), 3000);
         }
     }
 

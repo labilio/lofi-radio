@@ -5,10 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lofi Radio Widget</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.extra.css">
 </head>
 <body>
     <!-- 整个窗口可拖拽 -->
     <div id="widget" class="widget" data-focus-text="Today Focus: 0 min">
+        <!-- 电台列表面板 (默认隐藏) -->
+        <div id="stationListPanel" class="station-list-panel">
+            <div class="panel-header">
+                <h3>Select Station</h3>
+            </div>
+            <div class="station-list-container">
+                <ul id="stationListUl" class="station-list-ul">
+                    <!-- Stations will be populated here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- 电台列表按钮 (左上角) -->
+        <button id="stationListBtn" class="station-list-btn" title="切换电台">
+            <svg viewBox="0 0 24 24">
+                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/>
+            </svg>
+        </button>
+
         <!-- 封面区域 -->
         <div class="cover-section">
             <div class="vinyl-record" id="playPauseBtn">
@@ -30,8 +50,8 @@
             </div>
             <div class="info-section">
                 <div class="title-section">
-                    <h1 class="main-title">LofiGirl Live</h1>
-                    <p class="subtitle">Study music @SecretMaple</p>
+                    <h1 class="main-title" id="stationTitle">Loading...</h1>
+                    <!-- <p class="subtitle">Study music @SecretMaple</p> -->
                 </div>
                 <!-- 音量控制 -->
                 <div class="volume-control">
@@ -39,6 +59,19 @@
                         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
                     </svg>
                     <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="0.3">
+                </div>
+                
+                <!-- 普通模式播放控制 (新增) -->
+                <div class="normal-controls">
+                    <button id="normalPrevBtn" class="control-btn-small" title="上一个">
+                        <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+                    </button>
+                    <button id="normalRandomBtn" class="control-btn-small" title="随机">
+                        <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+                    </button>
+                    <button id="normalNextBtn" class="control-btn-small" title="下一个">
+                        <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,15 +88,31 @@
             </svg>
         </button>
 
+
+
         <!-- Mini模式播放按钮 -->
-        <button id="miniPlayBtn" class="mini-play-btn" title="播放/暂停">
-            <svg class="mini-play-icon" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-            </svg>
-            <svg class="mini-pause-icon" viewBox="0 0 24 24">
-                <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-            </svg>
-        </button>
+        <div class="mini-controls">
+            <button id="miniPrevBtn" class="mini-control-btn" title="上一个电台">
+                <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+            </button>
+            
+            <button id="miniPlayBtn" class="mini-play-btn" title="播放/暂停">
+                <svg class="mini-play-icon" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z"/>
+                </svg>
+                <svg class="mini-pause-icon" viewBox="0 0 24 24">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+                </svg>
+            </button>
+
+            <button id="miniNextBtn" class="mini-control-btn" title="下一个电台">
+                <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+            </button>
+
+            <button id="miniRandomBtn" class="mini-control-btn" title="随机电台">
+                <svg viewBox="0 0 24 24"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/></svg>
+            </button>
+        </div>
 
         <!-- Mini模式还原按钮 -->
         <button id="miniExpandBtn" class="mini-expand-btn" title="还原">
