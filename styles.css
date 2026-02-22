@@ -62,7 +62,16 @@ body, html {
         0 0 80px rgba(59, 130, 246, 0.12),
         0 0 120px rgba(30, 42, 59, 0.15);
 
-    /* 窗口拖拽 - 确保整个区域可拖拽 */
+    /*
+     * 窗口拖拽设置
+     * 
+     * 正确做法：在根容器设置 drag，让整个窗口可拖拽
+     * 
+     * 注意事项：
+     * - 子元素会继承 drag 属性
+     * - 需要交互的子元素必须显式设置 no-drag
+     * - 隐藏的元素（opacity: 0）如果设置了 no-drag，仍然会阻止拖拽！
+     */
     -webkit-app-region: drag;
 }
 
@@ -675,6 +684,24 @@ body, html {
     display: none;
 }
 
+/*
+ * 电台列表面板
+ * 
+ * 【重要】关于 -webkit-app-region 的正确设置：
+ * 
+ * ❌ 错误做法：在这里设置 -webkit-app-region: no-drag
+ *    原因：面板虽然隐藏（opacity: 0），但 no-drag 仍然生效
+ *         会导致 Mini 模式下窗口无法拖拽！
+ * 
+ * ✅ 正确做法：不设置 -webkit-app-region，让面板继承父元素的 drag
+ *    原因：面板隐藏时，drag 生效 → 窗口可拖拽
+ *         面板显示时，子元素（.station-list-item 等）设置 no-drag → 列表可点击
+ * 
+ * 【关键原理】
+ * - opacity: 0 和 pointer-events: none 不能覆盖 -webkit-app-region
+ * - -webkit-app-region 是 Electron 特有属性，与 CSS 的 pointer-events 是两个独立系统
+ * - 子元素的 no-drag 设置会阻止父元素的 drag，即使子元素是隐藏的
+ */
 .station-list-panel {
     position: absolute;
     top: 0;
@@ -694,6 +721,7 @@ body, html {
     transform: scale(0.95);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 20px;
+    /* 注意：这里不设置 -webkit-app-region，继承父元素的 drag */
 }
 
 .station-list-panel.active {
@@ -789,6 +817,15 @@ body, html {
     margin: 0;
 }
 
+/*
+ * 电台列表项
+ * 
+ * 这里设置 no-drag 是正确的，因为：
+ * - 列表项需要可点击交互
+ * - 面板显示时（.active），这些元素需要能响应点击
+ * - 面板隐藏时，父元素 .station-list-panel 设置了 pointer-events: none
+ *   鼠标事件会穿透到 .widget，子元素的 no-drag 不会被触发，drag 生效
+ */
 .station-list-item {
     padding: 6px 14px;
     margin-bottom: 2px;
@@ -820,6 +857,13 @@ body, html {
     font-weight: 500;
 }
 
+/*
+ * 电台标签容器和标签
+ * 
+ * 设置 no-drag 是正确的，因为：
+ * - 标签需要可点击（虽然目前没有点击事件）
+ * - 继承自 .station-list-item 的 no-drag，保持一致性
+ */
 .station-tags {
     display: flex;
     gap: 4px;
@@ -853,11 +897,23 @@ body, html {
     font-weight: 600;
 }
 
-.cover-section,
-.focus-time-display {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
+/*
+ * 列表打开状态下的特殊处理
+ * 
+ * 【问题背景】
+ * .cover-section 的子元素（.info-section, .title-section 等）都设置了 drag
+ * 当列表打开时，这些元素虽然隐藏（opacity: 0），但仍然会遮挡下面的列表
+ * 导致列表顶部区域无法点击
+ * 
+ * 【解决方案】
+ * 强制将这些隐藏元素的 app-region 设置为 no-drag
+ * 这样它们就不会阻挡下面列表的点击事件
+ * 
+ * 【注意事项】
+ * - 必须使用 !important 覆盖原有的 drag 设置
+ * - 需要列举所有子元素，新增元素时容易遗漏
+ * - 这是"脆弱平衡"的一部分，修改时需谨慎
+ */
 .list-open .cover-section,
 .list-open .focus-time-display {
     opacity: 0;
