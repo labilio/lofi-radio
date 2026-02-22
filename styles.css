@@ -694,7 +694,6 @@ body, html {
     transform: scale(0.95);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 20px;
-    -webkit-app-region: no-drag;
 }
 
 .station-list-panel.active {
@@ -713,7 +712,6 @@ body, html {
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     position: relative;
     flex-shrink: 0;
-    -webkit-app-region: no-drag;
 }
 
 .panel-header h3 {
@@ -764,7 +762,6 @@ body, html {
     padding-right: 4px;
     padding-bottom: 16px;
     -webkit-overflow-scrolling: touch;
-    -webkit-app-region: no-drag;
 }
 
 .station-list-container::-webkit-scrollbar {
@@ -790,7 +787,6 @@ body, html {
     padding: 0;
     padding-bottom: 12px;
     margin: 0;
-    -webkit-app-region: no-drag;
 }
 
 .station-list-item {
@@ -888,5 +884,5 @@ body, html {
 }
 
 .status-indicator {
-    -webkit-app-region: no-drag;
+    /* 不设置 -webkit-app-region，让它继承父元素的 drag */
 }
