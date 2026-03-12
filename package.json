@@ -51,7 +51,10 @@
     "win": {
       "icon": "icon.ico",
       "target": [
-        "dir"
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
       ]
     },
     "mac": {

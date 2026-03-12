@@ -32,7 +32,11 @@
         });
 
         player.addEventListener('pause', () => {
-            if (window.audioPlayer) window.audioPlayer.sendState({ playing: false });
+            // 蓝牙设备断开导致的暂停，自动恢复播放
+            // 由于用户暂停使用的是静音（setAudioMuted），不会触发 pause 事件
+            setTimeout(() => {
+                player.play().catch(e => console.log('Auto-resume after bluetooth disconnect failed:', e));
+            }, 100);
         });
 
         if (window.audioPlayer) {

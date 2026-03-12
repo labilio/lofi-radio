@@ -42,6 +42,7 @@ let currentStationIndex = 0;
 let isPlaying = false;
 let currentStationType = 'bilibili';
 let bilibiliPollInterval = null;
+let currentVolume = 0.3;
 
 function getIconPath() {
   const iconFormats = ['icon.ico', 'icon.png', 'icon-256.png', 'icon-128.png', 'icon-64.png', 'icon-32.png', 'icon-16.png'];
@@ -59,6 +60,8 @@ function getIconPath() {
 }
 
 function setApplicationVolume(volume) {
+  currentVolume = volume;
+
   if (!audioWindow || audioWindow.isDestroyed()) {
     return;
   }
@@ -355,6 +358,8 @@ function playStation(index) {
         setTimeout(() => {
           if (audioWindow && !audioWindow.isDestroyed()) {
             audioWindow.webContents.send('audio-command-station', station.url, station.type);
+            // 切换电台后应用保存的音量
+            audioWindow.webContents.send('audio-command-volume', currentVolume);
           }
         }, 100);
       }).catch(err => {
@@ -382,7 +387,15 @@ function initBilibiliAudio() {
       if (videos.length > 0) {
         videos.forEach(video => {
           video.muted = false;
-          video.volume = 0.3;
+          video.volume = ${currentVolume};
+          
+          // 蓝牙设备断开导致的暂停，自动恢复播放
+          // 由于用户暂停使用的是静音（setAudioMuted），不会触发 pause 事件
+          video.addEventListener('pause', () => {
+            setTimeout(() => {
+              video.play().catch(e => console.log('Auto-resume after bluetooth disconnect failed:', e));
+            }, 100);
+          });
         });
 
         videos[0].play().catch(e => {
