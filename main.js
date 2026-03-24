@@ -33,6 +33,8 @@ process.on('unhandledRejection', (reason, promise) => {
 
 process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = 'true';
 
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService');
+
 let mainWindow;
 let audioWindow;
 let tray;
