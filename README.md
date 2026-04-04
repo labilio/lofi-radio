@@ -138,13 +138,11 @@ ALT+Q (Windows) / Option+Q (macOS)
 
 ## 关于我 Secret
 
-**Secret** - AI Product Manager Intern / Web3 实习计划学员 (ETH Panda/LXDAO)
+**Secret** - AI Product  / ETH Panda实习计划学员
 
-> 正在寻找有趣的项目和合作机会
+> 正在寻找有趣的项目和职业机会
 
-**我能提供：** 产品思维 / 独立开发 / 数据洞察 / Web3 & AI 基础知识分享
-
-**开放：** 项目合作 / 行业交流 / 开源贡献
+**我能提供：** 产品思维 / 独立开发 / 数据洞察
 
 ### 过往经历
 
@@ -167,7 +165,7 @@ ALT+Q (Windows) / Option+Q (macOS)
 ### 联系我
 
 - 微信：Secret24_
-- 推特：[@SecretMaple24](https://twitter.com/SecretMaple24) | 定期更新 Web3 和 AI 相关内容
+- 推特：[@SecretMaple24](https://twitter.com/SecretMaple24) 
 - Telegram：https://t.me/SecretZ24
 
 ---
