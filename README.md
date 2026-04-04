@@ -1,6 +1,6 @@
 # Lofi Radio Player
 
-**[点击这里下载（绿色版免安装）](https://github.com/labilio/lofi-radio/releases/tag/v1.1.0)**
+**[点击这里下载（绿色版免安装）]([Releases · labilio/lofi-radio](https://github.com/labilio/lofi-radio/releases))**
 
 > 💡 **macOS 用户提示**：首次打开可能需要右键点击应用 → 选择"打开"，或在系统设置中允许运行
 
@@ -10,20 +10,28 @@
 
 ![v1.1.0-showcase](./images/v1.1.0-showcase.gif)
 
-
 **几乎所有手机都有灵动岛功能，也有大量的专注计时器软件，电脑为什么没有呢？**
 
 ## 简介
 
-这是一个精简小巧的桌面音乐播放器，挂在屏幕上。
-**就像把咖啡店的背景音乐搬进你的书房**
+这是一款精简小巧的桌面音乐播放器，挂在屏幕上，**就像把咖啡店的背景音乐搬进你的书房。**
 
-不需要本地音源，不需要选歌单。下载后直接打开即可收听。
+- **功能介绍**
+  - 两种模式：黑胶唱片 / 灵动岛风格，灵活切换
+  - 16 种电台：超多优质电台，学习工作时的沉浸陪伴
+  - 全局快捷键：自定义组合键，不打断专注
+  - 专注计时：记录你的每一次深度工作
 
-- 两种模式：黑胶唱片 / 灵动岛风格
-- 16 种电台：不仅是 Lofi，学习工作时的沉浸陪伴
-- 全局快捷键：一键暂停，不打断专注
-- 专注计时：记录你的每一次深度工作
+## 更新日志：沉浸加倍，交互焕新
+
+这个版本进行了交互设计优化和超多细节打磨！
+
+**Windows 用户：请在屏幕右下角系统托盘处，右键点击图标即可进入菜单（若找不到，请检查 ^ 隐藏图标区域）。**
+
+**macOS 用户：请在屏幕顶部右侧菜单栏点击图标即可。**
+
+![v1.2.0 - tiny poster](D:\lofi-radio\images\v1.2.0 - tiny poster.jpg)
+
 
 
 ## 界面展示
@@ -38,24 +46,18 @@
 ## 功能特点
 
 - **沉浸体验**：7x24 小时无限播放 Lofi 音乐（有助于专注工作学习的安静音乐）。
-
 - **双形态切换**：
   - 普通模式：旋转发光黑胶唱片质感
   - Mini 模式：仿灵动岛设计，小巧玲珑
-
 - **桌面陪伴**：可以挂在屏幕上的任何地方，安静陪伴不打扰
-
 - **多电台支持**：内置 16 个精选电台，点击左上角按钮即可切换，覆盖多种音乐风格
   - 🎧 **Lo-Fi / Chill**：Lofi Girl、Lofi Box、Chill Sky、Chill Wave、Groove Salad、ASP、Paradise、Drone Zone
   - 🎷 **Jazz**：Jazz Box，Jazz Groove、Jazz Smooth
   - 🎻 **Classical**：Swiss Classic，BBC 3
   - 🎤 **Hip-Hop / Indie**：Rap、KEXP
   - 🌧️ **Ambient / Nature**：Rain Sounds
-
 - **全局快捷键**：ALT+Q (Windows) / Option+Q (macOS) 一键暂停，不打断专注
-
 - **专注计时**：记录今日专注时长，每日自动重置
-
 - **记住偏好**：自动记住上次选择的电台，下次启动自动播放
 
 ---
@@ -155,9 +157,9 @@ ALT+Q (Windows) / Option+Q (macOS)
 - Web3 + AI 黑客松获奖作品「Seed-Hunter」- 产品 / 前端 / 分享
   - [📄 点击查看 PPT](https://docs.google.com/presentation/d/1VrepMGkB-hYMw1VezH1e5D-eaPr5UUsalVrfQlCAGg4/edit?usp=sharing) · [💻 点击查看 GitHub](https://github.com/labilio/Seed-Hunter)
 
-
 ### 联系我
 
+- 微信：Secret24_
 - 推特：[@SecretMaple24](https://twitter.com/SecretMaple24) | 定期更新 Web3 和 AI 相关内容
 - Telegram：https://t.me/SecretZ24
 
@@ -201,6 +203,6 @@ npm start
 
 ---
 
-欢迎提交 Issue 和 Pull Request！
+*欢迎提交 Issue 和 Pull Request！欢迎大家与我沟通！*
 
-右上角点个 **Star（收藏）** 支持一下，谢谢！
+*如果你也喜欢的话，欢迎点亮右上角的 **Star （收藏）⭐** 支持一下！这个对我很有帮助！*
