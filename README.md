@@ -1,6 +1,6 @@
 # Lofi Radio Player
 
-**[点击这里下载（绿色版免安装）]([Releases · labilio/lofi-radio](https://github.com/labilio/lofi-radio/releases))**
+**[点击这里下载（绿色版免安装）](https://github.com/labilio/lofi-radio/releases)**
 
 > 💡 **macOS 用户提示**：首次打开可能需要右键点击应用 → 选择"打开"，或在系统设置中允许运行
 
