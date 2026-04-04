@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发现新版本</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .update-container {
+            text-align: center;
+            padding: 40px 30px;
+            max-width: 360px;
+        }
+
+        .update-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-8px);
+            }
+            60% {
+                transform: translateY(-4px);
+            }
+        }
+
+        .update-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .version-info {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 28px;
+            line-height: 1.8;
+        }
+
+        .version-new {
+            color: #4a9eff;
+            font-weight: 500;
+        }
+
+        .version-current {
+            color: #666;
+        }
+
+        .update-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #4a9eff;
+            color: #fff;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #3a8eef;
+            transform: translateY(-1px);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+
+        .btn-link {
+            background: transparent;
+            color: #4a9eff;
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+
+        .btn-link:hover {
+            color: #6ab0ff;
+        }
+
+        .btn-skip {
+            background: transparent;
+            color: #888;
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+
+        .btn-skip:hover {
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="update-container">
+        <div class="update-icon">🎁</div>
+        <h1 class="update-title">发现新版本</h1>
+        <p class="version-info">
+            <span class="version-current">当前版本: v<span id="currentVersion"></span></span><br>
+            <span class="version-new">最新版本: v<span id="latestVersion"></span></span>
+        </p>
+
+        <div class="update-buttons">
+            <button class="btn btn-primary" id="downloadBtn">立即下载</button>
+            <div class="btn-row">
+                <button class="btn btn-link" id="viewChangesBtn">查看更新内容</button>
+                <button class="btn btn-skip" id="skipBtn">不再提醒</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentVersion = urlParams.get('current');
+        const latestVersion = urlParams.get('latest');
+        const releaseUrl = urlParams.get('url');
+
+        document.getElementById('currentVersion').textContent = currentVersion;
+        document.getElementById('latestVersion').textContent = latestVersion;
+
+        document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (window.updateAPI && window.updateAPI.download) {
+                window.updateAPI.download(releaseUrl);
+            }
+        });
+
+        document.getElementById('viewChangesBtn').addEventListener('click', () => {
+            if (window.updateAPI && window.updateAPI.viewChanges) {
+                window.updateAPI.viewChanges();
+            }
+        });
+
+        document.getElementById('skipBtn').addEventListener('click', () => {
+            if (window.updateAPI && window.updateAPI.skip) {
+                window.updateAPI.skip();
+            }
+        });
+    </script>
+</body>
+</html>

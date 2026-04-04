@@ -2,6 +2,8 @@ class LofiWidget {
     constructor() {
         this.isPlaying = true;
         this.currentVolume = 0.3;
+        this.previousVolume = 0.3;
+        this.isMuted = false;
         this.isReady = false;
         this.isStationListOpen = false;
         this.init();
@@ -10,6 +12,7 @@ class LofiWidget {
     init() {
         this.playPauseBtn = document.getElementById('playPauseBtn');
         this.volumeSlider = document.getElementById('volumeSlider');
+        this.volumeIcon = document.querySelector('.volume-icon');
         this.closeBtn = document.getElementById('closeBtn');
         this.miniModeBtn = document.getElementById('miniModeBtn');
         this.miniPlayBtn = document.getElementById('miniPlayBtn');
@@ -35,7 +38,6 @@ class LofiWidget {
         }
 
         this.updatePlayButton();
-        this.updateVolumeSlider();
         this.showStatus('🎵 系统就绪', 'ready');
         setTimeout(() => this.hideStatus(), 2000);
 
@@ -106,6 +108,13 @@ class LofiWidget {
             const volume = parseFloat(e.target.value);
             this.setVolume(volume);
         });
+
+        if (this.volumeIcon) {
+            this.volumeIcon.addEventListener('click', () => {
+                this.toggleMute();
+            });
+            this.volumeIcon.style.cursor = 'pointer';
+        }
 
         this.miniModeBtn.addEventListener('click', () => {
             this.toggleMiniMode();
@@ -299,11 +308,49 @@ class LofiWidget {
 
     setVolume(volume) {
         this.currentVolume = volume;
+        if (volume > 0) {
+            this.previousVolume = volume;
+            this.isMuted = false;
+        } else {
+            this.isMuted = true;
+        }
+        this.updateVolumeIcon();
         if (window.lofiWidget) {
             window.lofiWidget.setVolume(volume);
             const volumePercent = Math.round(volume * 100);
             this.showStatus(`音量: ${volumePercent}%`, 'info');
             setTimeout(() => this.hideStatus(), 1000);
+        }
+    }
+
+    toggleMute() {
+        if (this.isMuted) {
+            this.currentVolume = this.previousVolume > 0 ? this.previousVolume : 0.3;
+            this.isMuted = false;
+        } else {
+            this.previousVolume = this.currentVolume > 0 ? this.currentVolume : 0.3;
+            this.currentVolume = 0;
+            this.isMuted = true;
+        }
+        this.updateVolumeSlider();
+        this.updateVolumeIcon();
+        if (window.lofiWidget) {
+            window.lofiWidget.setVolume(this.currentVolume);
+            const statusText = this.isMuted ? '🔇 已静音' : `音量: ${Math.round(this.currentVolume * 100)}%`;
+            this.showStatus(statusText, this.isMuted ? 'error' : 'info');
+            setTimeout(() => this.hideStatus(), 1000);
+        }
+    }
+
+    updateVolumeIcon() {
+        if (!this.volumeIcon) return;
+        
+        if (this.isMuted || this.currentVolume === 0) {
+            this.volumeIcon.innerHTML = `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`;
+            this.volumeIcon.classList.add('muted');
+        } else {
+            this.volumeIcon.innerHTML = `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>`;
+            this.volumeIcon.classList.remove('muted');
         }
     }
 

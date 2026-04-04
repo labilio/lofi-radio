@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>已是最新版本</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .update-container {
+            text-align: center;
+            padding: 30px 50px 60px;
+        }
+
+        .rocket-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            animation: float 2s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        .update-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .version-info {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 28px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+        }
+
+        .btn-primary {
+            background: #4a9eff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #3a8eef;
+            transform: translateY(-1px);
+        }
+
+        .btn-link {
+            background: transparent;
+            color: #4a9eff;
+            font-size: 13px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            margin: 16px auto 0;
+            transition: color 0.2s ease;
+            display: block;
+            text-align: center;
+        }
+
+        .btn-link:hover {
+            color: #6ab0ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="update-container">
+        <div class="rocket-icon">🚀</div>
+        <h1 class="update-title">已是最新版本</h1>
+        <p class="version-info">当前版本 v<span id="currentVersion"></span></p>
+        <button class="btn btn-primary" id="okBtn">确定</button>
+        <button class="btn-link" id="viewChangesBtn">查看更新内容</button>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentVersion = urlParams.get('current');
+
+        document.getElementById('currentVersion').textContent = currentVersion;
+
+        document.getElementById('viewChangesBtn').addEventListener('click', () => {
+            if (window.updateAPI && window.updateAPI.viewChanges) {
+                window.updateAPI.viewChanges();
+            }
+        });
+
+        document.getElementById('okBtn').addEventListener('click', () => {
+            if (window.updateAPI && window.updateAPI.close) {
+                window.updateAPI.close();
+            }
+        });
+    </script>
+</body>
+</html>

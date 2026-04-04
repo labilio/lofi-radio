@@ -16,6 +16,13 @@ class FocusTimeManager {
         this.bindEvents();
         this.startTimer();
 
+        // 初始化时发送专注时间给主进程
+        setTimeout(() => {
+            if (window.electronAPI && window.electronAPI.sendFocusTime) {
+                window.electronAPI.sendFocusTime(this.focusTime);
+            }
+        }, 500);
+
         console.log('FocusTimeManager initialized');
     }
 
@@ -167,6 +174,11 @@ class FocusTimeManager {
         const widget = document.getElementById('widget');
         if (widget) {
             widget.setAttribute('data-focus-text', `Focus: ${this.focusTime} min`);
+        }
+
+        // 发送给主进程更新托盘菜单
+        if (window.electronAPI && window.electronAPI.sendFocusTime) {
+            window.electronAPI.sendFocusTime(this.focusTime);
         }
     }
 

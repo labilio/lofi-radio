@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - Lofi Radio Player</title>
+    <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+    <button class="close-btn" id="closeBtn">×</button>
+    
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>⚙️ 快捷键设置</h1>
+        </div>
+
+        <div class="settings-content">
+            <div class="shortcut-item">
+                <div class="shortcut-info">
+                    <span class="shortcut-label">播放/暂停</span>
+                    <span class="shortcut-desc">切换音乐播放状态</span>
+                </div>
+                <div class="shortcut-input-wrapper">
+                    <input type="text" id="playPauseShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
+                    <button class="clear-btn" data-target="playPauseShortcut">清空</button>
+                </div>
+            </div>
+
+            <div class="shortcut-item">
+                <div class="shortcut-info">
+                    <span class="shortcut-label">显示/隐藏主界面</span>
+                    <span class="shortcut-desc">切换主窗口显示状态</span>
+                </div>
+                <div class="shortcut-input-wrapper">
+                    <input type="text" id="toggleWindowShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
+                    <button class="clear-btn" data-target="toggleWindowShortcut">清空</button>
+                </div>
+            </div>
+
+            <p class="hint-text">💡 隐藏主界面后，可通过系统托盘右键菜单恢复显示</p>
+        </div>
+
+        <div class="settings-footer">
+            <button id="resetBtn" class="btn btn-secondary">恢复默认</button>
+            <button id="saveBtn" class="btn btn-primary">保存设置</button>
+        </div>
+
+        <div class="recording-hint" id="recordingHint">
+            <span>请按下新的快捷键组合...</span>
+            <span class="hint-sub">按 Esc 取消</span>
+        </div>
+    </div>
+
+    <script src="settings.js"></script>
+</body>
+</html>

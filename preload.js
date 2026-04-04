@@ -45,6 +45,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   toggleMiniMode: () => {
     ipcRenderer.send('toggle-mini-mode');
+  },
+
+  sendFocusTime: (time) => {
+    ipcRenderer.send('focus-time-update', time);
   }
 });
 
@@ -55,4 +59,28 @@ contextBridge.exposeInMainWorld('audioPlayer', {
   onChangeStation: (callback) => ipcRenderer.on('audio-command-station', (event, url, type) => callback(url, type)),
   sendState: (state) => ipcRenderer.send('audio-state-update', state),
   sendError: (error) => ipcRenderer.send('audio-error', error)
+});
+
+contextBridge.exposeInMainWorld('settingsAPI', {
+  getShortcuts: () => {
+    ipcRenderer.send('get-shortcuts');
+    return new Promise((resolve) => {
+      ipcRenderer.once('shortcuts-data', (event, shortcuts) => {
+        resolve(shortcuts);
+      });
+    });
+  },
+  
+  saveShortcuts: (shortcuts) => {
+    ipcRenderer.send('save-shortcuts', shortcuts);
+    return new Promise((resolve) => {
+      ipcRenderer.once('shortcuts-saved', (event, success) => {
+        resolve(success);
+      });
+    });
+  },
+
+  closeWindow: () => {
+    ipcRenderer.send('close-settings-window');
+  }
 });
