@@ -29,7 +29,7 @@
 
 **macOS 用户：请在屏幕顶部右侧菜单栏点击图标即可。**
 
-![v1.2.0 - tiny poster](D:\lofi-radio\images\v1.2.0 - tiny poster.jpg)
+![v1.2.0 - tiny poster](./images/v1.2.0%20-%20tiny%20poster.jpg)
 
 
 
