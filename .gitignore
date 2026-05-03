@@ -148,6 +148,9 @@ dist_green/
 .AppleDouble
 .LSOverride
 
+# Claude Code
+.claude/
+
 # Editor directories
 .cursor/
 .trae/
