@@ -8,6 +8,10 @@
 ![](https://img.shields.io/github/stars/labilio/lofi-radio)
 ![](https://img.shields.io/github/license/labilio/lofi-radio)
 
+## 📈 Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=labilio/lofi-radio&type=Date)](https://star-history.com/#labilio/lofi-radio&Date)
+
 ![v1.1.0-showcase](./images/v1.1.0-showcase.gif)
 
 **几乎所有手机都有灵动岛功能，也有大量的专注计时器软件，电脑为什么没有呢？**
