@@ -9,6 +9,7 @@
 ![](https://img.shields.io/github/license/labilio/lofi-radio)
 
 ## 📈 Star History
+Lofi Radio 于 2026 年 5 月正式突破 200+ Stars！真的非常感谢大家的支持！
 
 [![Star History Chart](https://api.star-history.com/svg?repos=labilio/lofi-radio&type=Date)](https://star-history.com/#labilio/lofi-radio&Date)
 
