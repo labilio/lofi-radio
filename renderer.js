@@ -52,6 +52,8 @@ class FocusTimeManager {
                 lastDate: this.lastDate
             };
             localStorage.setItem('lofi-focus-time', JSON.stringify(data));
+            // 兜底归档
+            this.archiveDate(this.lastDate, this.focusTime);
         } catch (error) {
             console.error('Failed to save focus time to storage:', error);
         }
@@ -69,10 +71,34 @@ class FocusTimeManager {
     checkDateReset() {
         const currentDate = this.getCurrentDate();
         if (this.lastDate !== currentDate) {
-            console.log('New day detected, resetting focus time');
+            console.log('New day detected, archiving yesterday and resetting');
+            this.archiveDate(this.lastDate, this.focusTime);
             this.focusTime = 0;
             this.lastDate = currentDate;
             this.saveToStorage();
+        }
+    }
+
+    // 归档每日专注数据到历史存储
+    archiveDate(dateString, focusTimeValue) {
+        if (!dateString || focusTimeValue <= 0) return;
+        try {
+            const stored = localStorage.getItem('lofi-focus-history');
+            const history = stored ? JSON.parse(stored) : {};
+            history[dateString] = focusTimeValue;
+            // 清理 90 天前的记录
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 90);
+            const cutoffStr = cutoff.getFullYear() + '-' +
+                String(cutoff.getMonth() + 1).padStart(2, '0') + '-' +
+                String(cutoff.getDate()).padStart(2, '0');
+            Object.keys(history).forEach(key => {
+                if (key < cutoffStr) delete history[key];
+            });
+            localStorage.setItem('lofi-focus-history', JSON.stringify(history));
+            console.log('Focus time archived:', dateString, focusTimeValue, 'min');
+        } catch (error) {
+            console.error('Failed to archive focus time:', error);
         }
     }
 
@@ -196,6 +222,34 @@ class FocusTimeManager {
         console.log('Focus time reset');
     }
 }
+
+// TODO: 测试完删除此种子函数
+(function seedTestHistory() {
+    const stored = localStorage.getItem('lofi-focus-history');
+    const history = stored ? JSON.parse(stored) : {};
+    // 合并写入，已有日期的数据不覆盖
+    const seed = {
+        '2026-05-18': 45,
+        '2026-05-19': 120,
+        '2026-05-20': 90,
+        '2026-05-21': 150,
+        '2026-05-22': 80,
+        '2026-05-23': 110
+    };
+    let merged = false;
+    Object.keys(seed).forEach(key => {
+        if (!history[key]) {
+            history[key] = seed[key];
+            merged = true;
+        }
+    });
+    if (merged) {
+        localStorage.setItem('lofi-focus-history', JSON.stringify(history));
+        console.log('Seeded test history data for May 18-23');
+    } else {
+        console.log('History seed skipped: all dates already exist');
+    }
+})();
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {

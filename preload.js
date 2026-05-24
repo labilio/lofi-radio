@@ -118,3 +118,13 @@ contextBridge.exposeInMainWorld('settingsAPI', {
     ipcRenderer.send('set-subtitle-config', config);
   }
 });
+
+contextBridge.exposeInMainWorld('historyAPI', {
+  closeWindow: () => {
+    ipcRenderer.send('close-history-window');
+  },
+
+  setContentHeight: (height) => {
+    ipcRenderer.send('set-history-height', height);
+  }
+});

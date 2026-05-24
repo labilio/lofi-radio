@@ -45,6 +45,7 @@ app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,Media
 let mainWindow;
 let audioWindow;
 let settingsWindow;
+let historyWindow;
 let tray;
 
 let stations = [];
@@ -450,6 +451,25 @@ function createWindow() {
     }
   });
 
+  ipcMain.on('close-history-window', () => {
+    if (historyWindow && !historyWindow.isDestroyed()) {
+      historyWindow.close();
+    }
+  });
+
+  ipcMain.on('set-history-height', (event, contentHeight) => {
+    if (historyWindow && !historyWindow.isDestroyed()) {
+      const minHeight = 250;
+      const maxHeight = 550;
+      const height = Math.max(minHeight, Math.min(maxHeight, Math.ceil(contentHeight) + 32));
+      historyWindow.setSize(420, height);
+      historyWindow.center();
+      if (!historyWindow.isVisible()) {
+        historyWindow.show();
+      }
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -491,7 +511,7 @@ function createSettingsWindow() {
 
   settingsWindow = new BrowserWindow({
     width: 560,
-    height: 700,
+    height: 730,
     show: false,
     icon: iconPath,
     webPreferences: {
@@ -520,6 +540,48 @@ function createSettingsWindow() {
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;
+  });
+}
+
+function createHistoryWindow() {
+  if (historyWindow && !historyWindow.isDestroyed()) {
+    historyWindow.focus();
+    return;
+  }
+
+  const iconPath = getIconPath();
+
+  historyWindow = new BrowserWindow({
+    width: 420,
+    height: 380,
+    show: false,
+    icon: iconPath,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      webSecurity: false,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    frame: false,
+    title: '专注历史 - Lofi Radio Player'
+  });
+
+  historyWindow.loadFile('history.html');
+
+  setTimeout(() => {
+    if (historyWindow && !historyWindow.isDestroyed() && !historyWindow.isVisible()) {
+      historyWindow.center();
+      historyWindow.show();
+    }
+  }, 2500);
+
+  historyWindow.on('closed', () => {
+    historyWindow = null;
   });
 }
 
@@ -901,6 +963,12 @@ function updateTrayMenu() {
       label: '设置',
       click: () => {
         createSettingsWindow();
+      }
+    },
+    {
+      label: '专注历史',
+      click: () => {
+        createHistoryWindow();
       }
     },
     {

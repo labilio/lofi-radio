@@ -328,10 +328,13 @@ class LofiWidget {
 
     getGreeting() {
         const hour = new Date().getHours();
-        if (hour >= 5 && hour < 12) return 'Good morning';
-        if (hour >= 12 && hour < 18) return 'Good afternoon';
-        if (hour >= 18 && hour < 24) return 'Good evening';
-        return 'Good night';
+        if (hour >= 0 && hour < 5)   return 'Hello, night owl';
+        if (hour >= 5 && hour < 8)   return 'Rise and shine';
+        if (hour >= 8 && hour < 11)  return 'Morning, sunshine';
+        if (hour >= 11 && hour < 13) return 'Enjoy the midday calm';
+        if (hour >= 13 && hour < 17) return 'Wishing you a peaceful afternoon';
+        if (hour >= 17 && hour < 20) return 'What a beautiful evening';
+        return 'Good evening, dreamer';
     }
 
     getDateString() {

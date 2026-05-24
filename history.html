@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>专注历史 - Lofi Radio Player</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css">
+    <link rel="stylesheet" href="history.css">
+</head>
+<body class="sl-theme-dark">
+    <button class="close-btn" id="closeBtn">&times;</button>
+
+    <div class="history-container">
+        <div class="history-header">
+            <h1>专注历史</h1>
+        </div>
+
+        <div class="capsule-group" id="viewToggle">
+            <sl-button class="capsule-option active" data-view="week" variant="primary" size="small">过去一周</sl-button>
+            <sl-button class="capsule-option" data-view="month" variant="default" size="small">过去一月</sl-button>
+        </div>
+
+        <div class="chart-container" id="chartContainer">
+            <div class="chart-placeholder">加载中...</div>
+        </div>
+    </div>
+
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+    <script src="history.js"></script>
+</body>
+</html>
