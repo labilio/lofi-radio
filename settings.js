@@ -12,6 +12,9 @@ class SettingsManager {
     init() {
         this.playPauseInput = document.getElementById('playPauseShortcut');
         this.toggleWindowInput = document.getElementById('toggleWindowShortcut');
+        this.launchAtStartupSwitch = document.getElementById('launchAtStartupToggle');
+        this.subtitleModeGroup = document.getElementById('subtitleModeGroup');
+        this.subtitleCustomText = document.getElementById('subtitleCustomText');
         this.recordingHint = document.getElementById('recordingHint');
         this.saveBtn = document.getElementById('saveBtn');
         this.resetBtn = document.getElementById('resetBtn');
@@ -19,6 +22,22 @@ class SettingsManager {
 
         this.loadSettings();
         this.bindEvents();
+        this.autoFitWindow();
+    }
+
+    autoFitWindow() {
+        Promise.all([
+            customElements.whenDefined('sl-switch'),
+            customElements.whenDefined('sl-button'),
+            customElements.whenDefined('sl-input')
+        ]).then(() => {
+            requestAnimationFrame(() => {
+                const height = document.documentElement.scrollHeight;
+                if (window.settingsAPI && window.settingsAPI.setContentHeight) {
+                    window.settingsAPI.setContentHeight(height);
+                }
+            });
+        });
     }
 
     async loadSettings() {
@@ -27,6 +46,17 @@ class SettingsManager {
             if (saved) {
                 this.shortcuts = { ...this.shortcuts, ...saved };
             }
+        }
+        if (window.settingsAPI && window.settingsAPI.getLaunchAtStartup) {
+            const enabled = await window.settingsAPI.getLaunchAtStartup();
+            this.launchAtStartupSwitch.checked = enabled;
+        }
+        if (window.settingsAPI && window.settingsAPI.getSubtitleConfig) {
+            const config = await window.settingsAPI.getSubtitleConfig();
+            const mode = config.mode || 'date';
+            this.setActiveCapsule(mode);
+            this.subtitleCustomText.value = config.customText || '';
+            this.toggleCustomTextInput(mode);
         }
         this.updateInputs();
     }
@@ -43,11 +73,12 @@ class SettingsManager {
             });
         });
 
-        document.querySelectorAll('.clear-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const targetId = e.target.dataset.target;
-                this.clearShortcut(targetId);
-            });
+        document.getElementById('clearPlayPauseBtn').addEventListener('click', () => {
+            this.clearShortcut('playPauseShortcut');
+        });
+
+        document.getElementById('clearToggleWindowBtn').addEventListener('click', () => {
+            this.clearShortcut('toggleWindowShortcut');
         });
 
         document.addEventListener('keydown', (e) => {
@@ -66,13 +97,65 @@ class SettingsManager {
 
         this.saveBtn.addEventListener('click', () => this.saveSettings());
         this.resetBtn.addEventListener('click', () => this.resetSettings());
-        
+
         if (this.closeBtn) {
             this.closeBtn.addEventListener('click', () => {
                 if (window.settingsAPI && window.settingsAPI.closeWindow) {
                     window.settingsAPI.closeWindow();
                 }
             });
+        }
+
+        if (this.launchAtStartupSwitch) {
+            this.launchAtStartupSwitch.addEventListener('sl-change', (e) => {
+                const enabled = e.target.checked;
+                if (window.settingsAPI && window.settingsAPI.setLaunchAtStartup) {
+                    window.settingsAPI.setLaunchAtStartup(enabled);
+                }
+            });
+        }
+
+        if (this.subtitleModeGroup) {
+            this.subtitleModeGroup.addEventListener('click', (e) => {
+                const btn = e.target.closest('.capsule-option');
+                if (!btn) return;
+                const mode = btn.dataset.mode;
+                this.setActiveCapsule(mode);
+                this.toggleCustomTextInput(mode);
+                this.saveSubtitleConfig(mode, this.subtitleCustomText.value);
+                this.autoFitWindow();
+            });
+        }
+
+        if (this.subtitleCustomText) {
+            this.subtitleCustomText.addEventListener('sl-input', (e) => {
+                this.saveSubtitleConfig(this.subtitleModeGroup.value, e.target.value);
+            });
+        }
+    }
+
+    setActiveCapsule(mode) {
+        this.subtitleModeGroup.querySelectorAll('.capsule-option').forEach(btn => {
+            if (btn.dataset.mode === mode) {
+                btn.variant = 'primary';
+                btn.classList.add('active');
+            } else {
+                btn.variant = 'default';
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    toggleCustomTextInput(mode) {
+        if (this.subtitleCustomText) {
+            this.subtitleCustomText.style.display = (mode === 'custom') ? 'block' : 'none';
+            requestAnimationFrame(() => this.autoFitWindow());
+        }
+    }
+
+    saveSubtitleConfig(mode, customText) {
+        if (window.settingsAPI && window.settingsAPI.setSubtitleConfig) {
+            window.settingsAPI.setSubtitleConfig({ mode, customText });
         }
     }
 
@@ -123,7 +206,7 @@ class SettingsManager {
         }
 
         const parts = [];
-        
+
         if (e.ctrlKey) parts.push('Ctrl');
         if (e.altKey) parts.push('Alt');
         if (e.shiftKey) parts.push('Shift');
@@ -148,7 +231,7 @@ class SettingsManager {
         }
 
         const shortcut = parts.join('+');
-        
+
         if (this.currentTarget === 'playPauseShortcut') {
             this.shortcuts.playPause = shortcut;
         } else if (this.currentTarget === 'toggleWindowShortcut') {
@@ -157,7 +240,7 @@ class SettingsManager {
 
         const input = document.getElementById(this.currentTarget);
         input.value = shortcut;
-        
+
         this.stopRecording();
         this.showToast(`快捷键已设置为: ${shortcut}`);
     }

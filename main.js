@@ -63,6 +63,11 @@ let shortcuts = {
 
 let focusTime = 0;
 
+let launchAtStartup = false;
+
+let subtitleMode = 'date';
+let subtitleCustomText = '';
+
 let isAnimating = false;
 
 function fadeWindowOut(callback) {
@@ -150,6 +155,15 @@ function loadConfig() {
       }
       if (data.volume !== undefined) {
         currentVolume = data.volume;
+      }
+      if (data.launchAtStartup !== undefined) {
+        launchAtStartup = data.launchAtStartup;
+      }
+      if (data.subtitleMode !== undefined) {
+        subtitleMode = data.subtitleMode;
+      }
+      if (data.subtitleCustomText !== undefined) {
+        subtitleCustomText = data.subtitleCustomText;
       }
       return data;
     }
@@ -397,6 +411,45 @@ function createWindow() {
     }
   });
 
+  ipcMain.on('set-settings-height', (event, contentHeight) => {
+    if (settingsWindow && !settingsWindow.isDestroyed()) {
+      const minHeight = 300;
+      const maxHeight = 700;
+      const height = Math.max(minHeight, Math.min(maxHeight, Math.ceil(contentHeight) + 32));
+      settingsWindow.setSize(520, height);
+      settingsWindow.center();
+      if (!settingsWindow.isVisible()) {
+        settingsWindow.show();
+      }
+    }
+  });
+
+  ipcMain.on('get-launch-at-startup', (event) => {
+    event.reply('launch-at-startup-data', launchAtStartup);
+  });
+
+  ipcMain.on('set-launch-at-startup', (event, enabled) => {
+    launchAtStartup = enabled;
+    app.setLoginItemSettings({ openAtLogin: enabled });
+    saveConfig({ launchAtStartup: enabled });
+  });
+
+  ipcMain.on('get-subtitle-config', (event) => {
+    event.reply('subtitle-config-data', { mode: subtitleMode, customText: subtitleCustomText });
+  });
+
+  ipcMain.on('set-subtitle-config', (event, config) => {
+    if (config.mode !== undefined) subtitleMode = config.mode;
+    if (config.customText !== undefined) subtitleCustomText = config.customText;
+    saveConfig({ subtitleMode, subtitleCustomText });
+    // loadConfig() inside saveConfig() overwrites globals with old file values — restore
+    if (config.mode !== undefined) subtitleMode = config.mode;
+    if (config.customText !== undefined) subtitleCustomText = config.customText;
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('subtitle-changed', { mode: subtitleMode, customText: subtitleCustomText });
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -407,8 +460,8 @@ function createAudioWindow() {
     const iconPath = getIconPath();
 
     audioWindow = new BrowserWindow({
-      width: 1200,
-      height: 800,
+      width: 1,
+      height: 1,
       show: false,
       icon: iconPath,
       webPreferences: {
@@ -437,14 +490,15 @@ function createSettingsWindow() {
   const iconPath = getIconPath();
 
   settingsWindow = new BrowserWindow({
-    width: 520,
-    height: 400,
-    show: true,
+    width: 560,
+    height: 700,
+    show: false,
     icon: iconPath,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
+      webSecurity: false,
       preload: path.join(__dirname, 'preload.js')
     },
     resizable: false,
@@ -456,6 +510,13 @@ function createSettingsWindow() {
   });
 
   settingsWindow.loadFile('settings.html');
+
+  setTimeout(() => {
+    if (settingsWindow && !settingsWindow.isDestroyed() && !settingsWindow.isVisible()) {
+      settingsWindow.center();
+      settingsWindow.show();
+    }
+  }, 2500);
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;
@@ -504,6 +565,7 @@ function playStation(index) {
     }
 
     if (currentStationType === 'bilibili') {
+      audioWindow.setSize(1200, 800);
       audioWindow.loadURL(station.url).then(() => {
         console.log('Bilibili page loaded');
         initBilibiliAudio();
@@ -515,6 +577,7 @@ function playStation(index) {
         clearInterval(bilibiliPollInterval);
         bilibiliPollInterval = null;
       }
+      audioWindow.setSize(1, 1);
       audioWindow.loadFile('audio.html').then(() => {
         console.log('Audio player loaded');
         setTimeout(() => {
@@ -879,6 +942,10 @@ function createTray() {
 
     updateTrayMenu();
 
+    tray.on('click', () => {
+      toggleMainWindowVisibility();
+    });
+
     console.log('Tray created successfully');
   } catch (e) {
     console.log('Tray creation failed, continuing without tray:', e.message);
@@ -925,6 +992,7 @@ function registerGlobalShortcut() {
 
 app.whenReady().then(() => {
   console.log('App is ready, creating windows...');
+  app.setLoginItemSettings({ openAtLogin: launchAtStartup });
   createAudioWindow();
   createWindow();
   createTray();
@@ -933,6 +1001,7 @@ app.whenReady().then(() => {
   setTimeout(() => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('volume-changed', currentVolume);
+      mainWindow.webContents.send('subtitle-changed', { mode: subtitleMode, customText: subtitleCustomText });
     }
   }, 100);
 

@@ -35,6 +35,10 @@ contextBridge.exposeInMainWorld('lofiWidget', {
   
   onStationChanged: (callback) => {
     ipcRenderer.on('station-changed', (event, station, index) => callback(station, index));
+  },
+
+  onSubtitleChanged: (callback) => {
+    ipcRenderer.on('subtitle-changed', (event, config) => callback(config));
   }
 });
 
@@ -82,5 +86,35 @@ contextBridge.exposeInMainWorld('settingsAPI', {
 
   closeWindow: () => {
     ipcRenderer.send('close-settings-window');
+  },
+
+  setContentHeight: (height) => {
+    ipcRenderer.send('set-settings-height', height);
+  },
+
+  getLaunchAtStartup: () => {
+    ipcRenderer.send('get-launch-at-startup');
+    return new Promise((resolve) => {
+      ipcRenderer.once('launch-at-startup-data', (event, enabled) => {
+        resolve(enabled);
+      });
+    });
+  },
+
+  setLaunchAtStartup: (enabled) => {
+    ipcRenderer.send('set-launch-at-startup', enabled);
+  },
+
+  getSubtitleConfig: () => {
+    ipcRenderer.send('get-subtitle-config');
+    return new Promise((resolve) => {
+      ipcRenderer.once('subtitle-config-data', (event, config) => {
+        resolve(config);
+      });
+    });
+  },
+
+  setSubtitleConfig: (config) => {
+    ipcRenderer.send('set-subtitle-config', config);
   }
 });

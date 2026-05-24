@@ -4,45 +4,74 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>设置 - Lofi Radio Player</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css">
     <link rel="stylesheet" href="settings.css">
 </head>
-<body>
+<body class="sl-theme-dark">
     <button class="close-btn" id="closeBtn">×</button>
-    
+
     <div class="settings-container">
         <div class="settings-header">
-            <h1>⚙️ 快捷键设置</h1>
+            <h1>⚙️ 功能设置</h1>
         </div>
 
-        <div class="settings-content">
-            <div class="shortcut-item">
-                <div class="shortcut-info">
-                    <span class="shortcut-label">播放/暂停</span>
-                    <span class="shortcut-desc">切换音乐播放状态</span>
+        <div class="settings-scroll">
+            <div class="settings-content">
+                <div class="shortcut-item">
+                    <div class="shortcut-info">
+                        <span class="shortcut-label">播放/暂停</span>
+                        <span class="shortcut-desc">切换音乐播放状态</span>
+                    </div>
+                    <div class="shortcut-input-wrapper">
+                        <input type="text" id="playPauseShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
+                        <sl-button id="clearPlayPauseBtn" size="small" variant="default">清空</sl-button>
+                    </div>
                 </div>
-                <div class="shortcut-input-wrapper">
-                    <input type="text" id="playPauseShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
-                    <button class="clear-btn" data-target="playPauseShortcut">清空</button>
+
+                <div class="shortcut-item">
+                    <div class="shortcut-info">
+                        <span class="shortcut-label">显示/隐藏主界面</span>
+                        <span class="shortcut-desc">切换主窗口显示状态</span>
+                    </div>
+                    <div class="shortcut-input-wrapper">
+                        <input type="text" id="toggleWindowShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
+                        <sl-button id="clearToggleWindowBtn" size="small" variant="default">清空</sl-button>
+                    </div>
+                </div>
+
+                <p class="hint-text">💡 隐藏主界面后，点击系统托盘图标即可恢复</p>
+            </div>
+
+            <div class="settings-content">
+                <div class="shortcut-item">
+                    <div class="shortcut-info">
+                        <span class="shortcut-label">开机自启</span>
+                        <span class="shortcut-desc">系统启动时自动运行 Lofi Radio</span>
+                    </div>
+                    <sl-switch id="launchAtStartupToggle"></sl-switch>
                 </div>
             </div>
 
-            <div class="shortcut-item">
-                <div class="shortcut-info">
-                    <span class="shortcut-label">显示/隐藏主界面</span>
-                    <span class="shortcut-desc">切换主窗口显示状态</span>
-                </div>
-                <div class="shortcut-input-wrapper">
-                    <input type="text" id="toggleWindowShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
-                    <button class="clear-btn" data-target="toggleWindowShortcut">清空</button>
+            <div class="settings-content">
+                <div class="shortcut-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
+                    <div class="shortcut-info" style="width: 100%;">
+                        <span class="shortcut-label">副标题自定义</span>
+                        <span class="shortcut-desc">主界面电台名称下方的显示内容</span>
+                    </div>
+                    <div class="capsule-group" id="subtitleModeGroup">
+                        <sl-button class="capsule-option" data-mode="greeting" variant="default" size="small">动态问候语</sl-button>
+                        <sl-button class="capsule-option active" data-mode="date" variant="primary" size="small">日期</sl-button>
+                        <sl-button class="capsule-option" data-mode="custom" variant="default" size="small">自定义</sl-button>
+                    </div>
+                    <sl-input id="subtitleCustomText" placeholder="请输入你的专属签名..." maxlength="50" clearable
+                              style="display: none; width: 100%;"></sl-input>
                 </div>
             </div>
-
-            <p class="hint-text">💡 隐藏主界面后，可通过系统托盘右键菜单恢复显示</p>
         </div>
 
         <div class="settings-footer">
-            <button id="resetBtn" class="btn btn-secondary">恢复默认</button>
-            <button id="saveBtn" class="btn btn-primary">保存设置</button>
+            <sl-button id="resetBtn" variant="default">恢复默认</sl-button>
+            <sl-button id="saveBtn" variant="primary">保存设置</sl-button>
         </div>
 
         <div class="recording-hint" id="recordingHint">
@@ -51,6 +80,7 @@
         </div>
     </div>
 
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

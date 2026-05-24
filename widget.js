@@ -30,6 +30,9 @@ class LofiWidget {
         this.stationListUl = document.getElementById('stationListUl');
         this.stationTitle = document.getElementById('stationTitle');
         this.panelBackBtn = document.getElementById('panelBackBtn');
+        this.subtitleEl = document.querySelector('.subtitle');
+        this.currentSubtitleConfig = { mode: 'date', customText: '' };
+        this.subtitleTimer = null;
 
         this.bindEvents();
 
@@ -185,6 +188,15 @@ class LofiWidget {
                     this.updateCurrentStation(station, index);
                 });
             }
+
+            if (window.lofiWidget.onSubtitleChanged) {
+                window.lofiWidget.onSubtitleChanged((config) => {
+                    this.updateSubtitle(config);
+                });
+            }
+
+            this.updateSubtitle(this.currentSubtitleConfig);
+            this.startSubtitleTimer();
         }
     }
 
@@ -286,6 +298,58 @@ class LofiWidget {
             this.showStatus(`正在播放: ${station.name}`, 'ready');
             setTimeout(() => this.hideStatus(), 1500);
         }
+    }
+
+    updateSubtitle(config) {
+        if (config) {
+            this.currentSubtitleConfig = config;
+        }
+        if (!this.subtitleEl) return;
+
+        const { mode, customText } = this.currentSubtitleConfig;
+        let text = '';
+
+        switch (mode) {
+            case 'date':
+                text = this.getDateString();
+                break;
+            case 'custom':
+                text = customText || '';
+                break;
+            case 'greeting':
+            default:
+                text = this.getGreeting();
+                break;
+        }
+
+        this.subtitleEl.textContent = text;
+        this.subtitleEl.title = (mode === 'custom' && text.length > 0) ? text : '';
+    }
+
+    getGreeting() {
+        const hour = new Date().getHours();
+        if (hour >= 5 && hour < 12) return 'Good morning';
+        if (hour >= 12 && hour < 18) return 'Good afternoon';
+        if (hour >= 18 && hour < 24) return 'Good evening';
+        return 'Good night';
+    }
+
+    getDateString() {
+        const now = new Date();
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['January', 'February', 'March', 'April', 'May', 'June',
+                        'July', 'August', 'September', 'October', 'November', 'December'];
+        return `${days[now.getDay()]}, ${months[now.getMonth()]} ${now.getDate()}`;
+    }
+
+    startSubtitleTimer() {
+        if (this.subtitleTimer) clearInterval(this.subtitleTimer);
+        this.subtitleTimer = setInterval(() => {
+            if (this.currentSubtitleConfig.mode === 'greeting' ||
+                this.currentSubtitleConfig.mode === 'date') {
+                this.updateSubtitle();
+            }
+        }, 60000);
     }
 
     togglePlayPause() {
