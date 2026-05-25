@@ -119,6 +119,7 @@ sl-button[size="small"]::part(base) {
     flex-shrink: 0;
     text-align: center;
     margin-bottom: 18px;
+    margin-right: 46px;
     -webkit-app-region: drag;
 }
 
