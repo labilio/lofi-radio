@@ -332,7 +332,7 @@ class LofiWidget {
         if (hour >= 5 && hour < 8)   return 'Rise and shine';
         if (hour >= 8 && hour < 11)  return 'Morning, sunshine';
         if (hour >= 11 && hour < 13) return 'Enjoy the midday calm';
-        if (hour >= 13 && hour < 17) return 'Wishing you a peaceful afternoon';
+        if (hour >= 13 && hour < 17) return 'A peaceful afternoon';
         if (hour >= 17 && hour < 20) return 'What a beautiful evening';
         return 'Good evening, dreamer';
     }
