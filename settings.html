@@ -3,75 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设置 - Lofi Radio Player</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css">
+    <title>偏好设置 - Lofi Radio Player</title>
+    <link rel="stylesheet" href="node_modules/@awesome.me/webawesome/dist-cdn/styles/themes/shoelace.css">
+    <link rel="stylesheet" href="subpage-foundation.css">
     <link rel="stylesheet" href="settings.css">
 </head>
-<body class="sl-theme-dark">
-    <button class="close-btn" id="closeBtn">×</button>
-
-    <div class="settings-container">
-        <div class="settings-header">
-            <h1>功能设置</h1>
-        </div>
+<body class="wa-theme-shoelace wa-palette-shoelace wa-dark">
+    <div class="settings-container subpage-frame">
+        <header class="settings-header subpage-header">
+            <div class="subpage-heading">
+                <span class="product-label">LOFI RADIO</span>
+                <h1>偏好设置</h1>
+            </div>
+            <button class="close-btn" id="closeBtn" aria-label="关闭">&times;</button>
+        </header>
 
         <div class="settings-scroll">
-            <div class="settings-content">
-                <div class="shortcut-item">
-                    <div class="shortcut-info">
-                        <span class="shortcut-label">播放/暂停</span>
-                        <span class="shortcut-desc">切换音乐播放状态</span>
-                    </div>
+            <section class="settings-section" aria-labelledby="shortcutSectionTitle">
+                <div class="section-heading">
+                    <h2 id="shortcutSectionTitle">全局快捷键</h2>
+                    <span>点按键帽重新录制</span>
+                </div>
+
+                <div class="setting-row shortcut-row">
+                    <span class="setting-label">播放 / 暂停</span>
                     <div class="shortcut-input-wrapper">
                         <input type="text" id="playPauseShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
-                        <sl-button id="clearPlayPauseBtn" size="small" variant="default">清空</sl-button>
+                        <wa-button class="clear-button" id="clearPlayPauseBtn" size="s" variant="neutral">清除</wa-button>
                     </div>
                 </div>
 
-                <div class="shortcut-item">
-                    <div class="shortcut-info">
-                        <span class="shortcut-label">显示/隐藏主界面</span>
-                        <span class="shortcut-desc">切换主窗口显示状态</span>
+                <div class="setting-row shortcut-row">
+                    <div class="setting-copy">
+                        <span class="setting-label">显示 / 隐藏主界面</span>
+                        <p class="hint-text">隐藏主界面后，可从系统托盘重新打开。</p>
                     </div>
                     <div class="shortcut-input-wrapper">
                         <input type="text" id="toggleWindowShortcut" class="shortcut-input" readonly placeholder="点击录制快捷键">
-                        <sl-button id="clearToggleWindowBtn" size="small" variant="default">清空</sl-button>
+                        <wa-button class="clear-button" id="clearToggleWindowBtn" size="s" variant="neutral">清除</wa-button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" aria-labelledby="startupSectionTitle">
+                <div class="setting-row">
+                    <div class="setting-copy">
+                        <h2 id="startupSectionTitle">开机自启</h2>
+                        <p>登录系统后自动运行 Lofi Radio</p>
+                    </div>
+                    <div class="switch-control">
+                        <span class="switch-status" id="launchAtStartupStatus">已关闭</span>
+                        <button class="toggle-switch" id="launchAtStartupToggle" type="button"
+                                role="switch" aria-checked="false" aria-label="开机自启">
+                            <span class="toggle-thumb" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section" aria-labelledby="todayFocusSectionTitle">
+                <div class="setting-row">
+                    <div class="setting-copy">
+                        <h2 id="todayFocusSectionTitle">显示专注计时</h2>
+                        <p>在普通模式下显示 Today Focus</p>
+                    </div>
+                    <div class="switch-control">
+                        <span class="switch-status" id="showTodayFocusStatus">已开启</span>
+                        <button class="toggle-switch is-checked" id="showTodayFocusToggle" type="button"
+                                role="switch" aria-checked="true" aria-label="显示专注计时">
+                            <span class="toggle-thumb" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="settings-section subtitle-section" aria-labelledby="subtitleSectionTitle">
+                <div class="section-heading">
+                    <div>
+                        <h2 id="subtitleSectionTitle">主界面副标题</h2>
+                        <p>选择电台名称下方显示的内容</p>
                     </div>
                 </div>
 
-                <p class="hint-text">💡 隐藏主界面后，点击系统托盘图标即可恢复</p>
-            </div>
-
-            <div class="settings-content">
-                <div class="shortcut-item">
-                    <div class="shortcut-info">
-                        <span class="shortcut-label">开机自启</span>
-                        <span class="shortcut-desc">系统启动时自动运行 Lofi Radio</span>
-                    </div>
-                    <sl-switch id="launchAtStartupToggle"></sl-switch>
+                <div class="capsule-group" id="subtitleModeGroup">
+                    <wa-button class="capsule-option" data-mode="greeting" variant="neutral" size="s">动态问候</wa-button>
+                    <wa-button class="capsule-option active" data-mode="date" variant="brand" size="s">日期</wa-button>
+                    <wa-button class="capsule-option" data-mode="custom" variant="neutral" size="s">自定义</wa-button>
                 </div>
-            </div>
-
-            <div class="settings-content">
-                <div class="shortcut-item" style="flex-direction: column; align-items: flex-start; gap: 10px;">
-                    <div class="shortcut-info" style="width: 100%;">
-                        <span class="shortcut-label">副标题自定义</span>
-                        <span class="shortcut-desc">主界面电台名称下方的显示内容</span>
-                    </div>
-                    <div class="capsule-group" id="subtitleModeGroup">
-                        <sl-button class="capsule-option" data-mode="greeting" variant="default" size="small">动态问候语</sl-button>
-                        <sl-button class="capsule-option active" data-mode="date" variant="primary" size="small">日期</sl-button>
-                        <sl-button class="capsule-option" data-mode="custom" variant="default" size="small">自定义</sl-button>
-                    </div>
-                    <sl-input id="subtitleCustomText" placeholder="请输入你的专属签名..." maxlength="50" clearable
-                              style="display: none; width: 100%;"></sl-input>
-                </div>
-            </div>
+                <wa-input id="subtitleCustomText" placeholder="留空则不显示副标题" maxlength="50" with-clear
+                          style="display: none; width: 100%;"></wa-input>
+            </section>
         </div>
 
         <div class="settings-footer">
-            <sl-button id="resetBtn" variant="default">恢复默认</sl-button>
-            <sl-button id="saveBtn" variant="primary">保存设置</sl-button>
+            <div class="footer-actions">
+                <wa-button id="resetBtn" variant="neutral">恢复默认</wa-button>
+                <wa-button id="saveBtn" variant="brand">保存设置</wa-button>
+            </div>
         </div>
 
         <div class="recording-hint" id="recordingHint">
@@ -80,7 +108,7 @@
         </div>
     </div>
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+    <script type="module" src="webawesome-components.js"></script>
     <script src="settings.js"></script>
 </body>
 </html>

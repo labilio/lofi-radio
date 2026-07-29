@@ -1,0 +1,220 @@
+:root {
+    color-scheme: dark;
+    --night: #171c31;
+    --panel: #20263d;
+    --control: #2a314a;
+    --line: rgba(255, 255, 255, 0.085);
+    --text: #f2f5fb;
+    --muted: #9099ae;
+    --signal: #4a9eff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--night);
+    color: var(--text);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+}
+
+body {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(74, 158, 255, 0.1), transparent 38%),
+        linear-gradient(145deg, #171c31, #1a2138);
+}
+
+button {
+    font: inherit;
+}
+
+.update-page {
+    height: 100%;
+}
+
+.update-page .subpage-header {
+    min-height: 49px;
+}
+
+.update-shell {
+    height: calc(100% - 49px);
+    display: flex;
+    flex-direction: column;
+    padding: 4px 4px 4px;
+}
+
+.message {
+    margin: 6px 0 0;
+    color: #99a3b9;
+    font-size: var(--subpage-body-size);
+    line-height: 1.55;
+}
+
+.version-rail,
+.status-panel {
+    min-height: 54px;
+    margin-top: 15px;
+    border: 1px solid var(--line);
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.026);
+}
+
+.version-rail {
+    display: grid;
+    grid-template-columns: 1fr 30px 1fr;
+    align-items: center;
+    padding: 8px 13px;
+}
+
+.version-block {
+    display: grid;
+    gap: 2px;
+}
+
+.version-block:last-child {
+    text-align: right;
+}
+
+.version-caption {
+    color: #717b92;
+    font-size: var(--subpage-caption-size);
+}
+
+.version-value {
+    color: #cbd2df;
+    font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    font-size: var(--subpage-body-size);
+    font-weight: 650;
+}
+
+.version-block.is-new .version-caption,
+.version-block.is-new .version-value {
+    color: #79b8ff;
+}
+
+.version-arrow {
+    color: #59637a;
+    font-size: 17px;
+    text-align: center;
+}
+
+.version-rail.is-current {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.current-badge {
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: #75d6aa;
+    background: rgba(88, 199, 151, 0.1);
+    font-size: var(--subpage-caption-size);
+    font-weight: 650;
+}
+
+.status-panel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 13px;
+    color: #a8b1c5;
+    font-size: var(--subpage-body-size);
+    line-height: 1.45;
+}
+
+.status-code {
+    flex: 0 0 auto;
+    padding: 4px 7px;
+    border-radius: 7px;
+    color: #ffbe82;
+    background: rgba(255, 173, 102, 0.1);
+    font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    font-size: var(--subpage-caption-size);
+    font-weight: 700;
+}
+
+.actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+}
+
+.btn {
+    min-height: 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: var(--subpage-control-size);
+    font-weight: 600;
+    transition: color 120ms ease, background 120ms ease, border-color 120ms ease;
+}
+
+.external-link-icon {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.btn-primary {
+    color: #fff;
+    background: var(--signal);
+    box-shadow: 0 7px 18px rgba(74, 158, 255, 0.18);
+}
+
+.btn-primary:hover {
+    background: #5aa7ff;
+}
+
+.btn-secondary {
+    color: #abb4c7;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.045);
+}
+
+.btn-secondary:hover {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.085);
+}
+
+.btn-quiet {
+    margin-left: auto;
+    padding-inline: 8px;
+    color: #778197;
+    background: transparent;
+}
+
+.btn-quiet:hover {
+    color: #b6bed0;
+}
+
+button:focus-visible {
+    outline: 2px solid #78b7ff;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+    }
+}

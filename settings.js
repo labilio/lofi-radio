@@ -1,3 +1,25 @@
+function measureSettingsContentHeight() {
+    const container = document.querySelector('.settings-container');
+    const header = document.querySelector('.settings-header');
+    const scrollArea = document.querySelector('.settings-scroll');
+    const footer = document.querySelector('.settings-footer');
+    const style = getComputedStyle(container);
+    const scrollStyle = getComputedStyle(scrollArea);
+    const verticalPadding =
+        parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    const scrollBorders =
+        parseFloat(scrollStyle.borderTopWidth) + parseFloat(scrollStyle.borderBottomWidth);
+    const naturalScrollHeight = Array.from(scrollArea.children)
+        .reduce((height, section) => height + section.getBoundingClientRect().height, scrollBorders);
+
+    return Math.ceil(
+        verticalPadding
+        + header.scrollHeight
+        + naturalScrollHeight
+        + footer.scrollHeight
+    );
+}
+
 class SettingsManager {
     constructor() {
         this.shortcuts = {
@@ -13,6 +35,9 @@ class SettingsManager {
         this.playPauseInput = document.getElementById('playPauseShortcut');
         this.toggleWindowInput = document.getElementById('toggleWindowShortcut');
         this.launchAtStartupSwitch = document.getElementById('launchAtStartupToggle');
+        this.launchAtStartupStatus = document.getElementById('launchAtStartupStatus');
+        this.showTodayFocusSwitch = document.getElementById('showTodayFocusToggle');
+        this.showTodayFocusStatus = document.getElementById('showTodayFocusStatus');
         this.subtitleModeGroup = document.getElementById('subtitleModeGroup');
         this.subtitleCustomText = document.getElementById('subtitleCustomText');
         this.recordingHint = document.getElementById('recordingHint');
@@ -27,12 +52,11 @@ class SettingsManager {
 
     autoFitWindow() {
         Promise.all([
-            customElements.whenDefined('sl-switch'),
-            customElements.whenDefined('sl-button'),
-            customElements.whenDefined('sl-input')
+            customElements.whenDefined('wa-button'),
+            customElements.whenDefined('wa-input')
         ]).then(() => {
             requestAnimationFrame(() => {
-                const height = document.documentElement.scrollHeight;
+                const height = measureSettingsContentHeight();
                 if (window.settingsAPI && window.settingsAPI.setContentHeight) {
                     window.settingsAPI.setContentHeight(height);
                 }
@@ -48,8 +72,13 @@ class SettingsManager {
             }
         }
         if (window.settingsAPI && window.settingsAPI.getLaunchAtStartup) {
-            const enabled = await window.settingsAPI.getLaunchAtStartup();
-            this.launchAtStartupSwitch.checked = enabled;
+            const status = await window.settingsAPI.getLaunchAtStartup();
+            const enabled = typeof status === 'object' ? status.enabled : status;
+            this.updateLaunchAtStartupStatus(Boolean(enabled));
+        }
+        if (window.settingsAPI && window.settingsAPI.getShowTodayFocus) {
+            const enabled = await window.settingsAPI.getShowTodayFocus();
+            this.updateShowTodayFocusStatus(enabled !== false);
         }
         if (window.settingsAPI && window.settingsAPI.getSubtitleConfig) {
             const config = await window.settingsAPI.getSubtitleConfig();
@@ -107,10 +136,56 @@ class SettingsManager {
         }
 
         if (this.launchAtStartupSwitch) {
-            this.launchAtStartupSwitch.addEventListener('sl-change', (e) => {
-                const enabled = e.target.checked;
-                if (window.settingsAPI && window.settingsAPI.setLaunchAtStartup) {
-                    window.settingsAPI.setLaunchAtStartup(enabled);
+            this.launchAtStartupSwitch.addEventListener('click', async () => {
+                const enabled = this.launchAtStartupSwitch.getAttribute('aria-checked') !== 'true';
+                const previousEnabled = !enabled;
+
+                this.launchAtStartupSwitch.disabled = true;
+
+                try {
+                    if (!window.settingsAPI || !window.settingsAPI.setLaunchAtStartup) {
+                        throw new Error('启动项接口不可用');
+                    }
+
+                    const status = await window.settingsAPI.setLaunchAtStartup(enabled);
+                    const actualEnabled = typeof status === 'object' && status !== null
+                        ? Boolean(status.enabled)
+                        : enabled;
+
+                    this.updateLaunchAtStartupStatus(actualEnabled);
+                    if (status?.error || actualEnabled !== enabled) {
+                        this.showToast(status?.error || 'Windows 未能启用此启动项', 'error');
+                    }
+                } catch (error) {
+                    this.updateLaunchAtStartupStatus(previousEnabled);
+                    this.showToast('开机自启设置失败，请重试', 'error');
+                } finally {
+                    this.launchAtStartupSwitch.disabled = false;
+                }
+            });
+        }
+
+        if (this.showTodayFocusSwitch) {
+            this.showTodayFocusSwitch.addEventListener('click', async () => {
+                const previousEnabled =
+                    this.showTodayFocusSwitch.getAttribute('aria-checked') === 'true';
+                const enabled = !previousEnabled;
+
+                this.showTodayFocusSwitch.disabled = true;
+                this.updateShowTodayFocusStatus(enabled);
+
+                try {
+                    if (!window.settingsAPI || !window.settingsAPI.setShowTodayFocus) {
+                        throw new Error('专注计时显示设置接口不可用');
+                    }
+
+                    const savedEnabled = await window.settingsAPI.setShowTodayFocus(enabled);
+                    this.updateShowTodayFocusStatus(savedEnabled !== false);
+                } catch (error) {
+                    this.updateShowTodayFocusStatus(previousEnabled);
+                    this.showToast('专注计时显示设置失败，请重试', 'error');
+                } finally {
+                    this.showTodayFocusSwitch.disabled = false;
                 }
             });
         }
@@ -123,12 +198,11 @@ class SettingsManager {
                 this.setActiveCapsule(mode);
                 this.toggleCustomTextInput(mode);
                 this.saveSubtitleConfig(mode, this.subtitleCustomText.value);
-                this.autoFitWindow();
             });
         }
 
         if (this.subtitleCustomText) {
-            this.subtitleCustomText.addEventListener('sl-input', (e) => {
+            this.subtitleCustomText.addEventListener('input', (e) => {
                 this.saveSubtitleConfig(this.subtitleModeGroup.value, e.target.value);
             });
         }
@@ -137,18 +211,43 @@ class SettingsManager {
     setActiveCapsule(mode) {
         this.subtitleModeGroup.querySelectorAll('.capsule-option').forEach(btn => {
             if (btn.dataset.mode === mode) {
-                btn.variant = 'primary';
+                btn.variant = 'brand';
                 btn.classList.add('active');
             } else {
-                btn.variant = 'default';
+                btn.variant = 'neutral';
                 btn.classList.remove('active');
             }
         });
     }
 
+    updateLaunchAtStartupStatus(enabled) {
+        if (this.launchAtStartupSwitch) {
+            this.launchAtStartupSwitch.classList.toggle('is-checked', Boolean(enabled));
+            this.launchAtStartupSwitch.setAttribute('aria-checked', String(Boolean(enabled)));
+        }
+        if (this.launchAtStartupStatus) {
+            this.launchAtStartupStatus.textContent = enabled ? '已开启' : '已关闭';
+        }
+    }
+
+    updateShowTodayFocusStatus(enabled) {
+        if (this.showTodayFocusSwitch) {
+            this.showTodayFocusSwitch.classList.toggle('is-checked', Boolean(enabled));
+            this.showTodayFocusSwitch.setAttribute('aria-checked', String(Boolean(enabled)));
+        }
+        if (this.showTodayFocusStatus) {
+            this.showTodayFocusStatus.textContent = enabled ? '已开启' : '已关闭';
+        }
+    }
+
     toggleCustomTextInput(mode) {
         if (this.subtitleCustomText) {
-            this.subtitleCustomText.style.display = (mode === 'custom') ? 'block' : 'none';
+            const display = mode === 'custom' ? 'block' : 'none';
+            if (this.subtitleCustomText.style.display === display) {
+                return;
+            }
+
+            this.subtitleCustomText.style.display = display;
             requestAnimationFrame(() => this.autoFitWindow());
         }
     }
@@ -169,7 +268,7 @@ class SettingsManager {
 
         const input = document.getElementById(targetId);
         input.classList.add('recording');
-        input.value = '按下快捷键...';
+        input.value = '请按组合键';
 
         this.recordingHint.classList.add('show');
     }
@@ -262,6 +361,16 @@ class SettingsManager {
             toggleWindow: ''
         };
         this.updateInputs();
+        this.subtitleCustomText.value = '';
+        this.setActiveCapsule('date');
+        this.toggleCustomTextInput('date');
+        this.saveSubtitleConfig('date', '');
+        this.updateShowTodayFocusStatus(true);
+        if (window.settingsAPI && window.settingsAPI.setShowTodayFocus) {
+            window.settingsAPI.setShowTodayFocus(true).catch(() => {
+                this.showToast('专注计时显示设置失败，请重试', 'error');
+            });
+        }
         this.showToast('已恢复默认设置');
     }
 

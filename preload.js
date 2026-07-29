@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld('lofiWidget', {
   getStations: () => ipcRenderer.send('get-stations'),
   
   changeStation: (index) => ipcRenderer.send('change-station', index),
+
+  retryPlayback: () => ipcRenderer.send('retry-playback'),
   
   onStationsList: (callback) => {
     ipcRenderer.on('stations-list', (event, stations) => callback(stations));
@@ -37,8 +39,18 @@ contextBridge.exposeInMainWorld('lofiWidget', {
     ipcRenderer.on('station-changed', (event, station, index) => callback(station, index));
   },
 
+  onPlaybackStatusChange: (callback) => {
+    ipcRenderer.on('playback-status-changed', (event, status) => callback(status));
+  },
+
   onSubtitleChanged: (callback) => {
     ipcRenderer.on('subtitle-changed', (event, config) => callback(config));
+  },
+
+  getShowTodayFocus: () => ipcRenderer.invoke('get-show-today-focus'),
+
+  onShowTodayFocusChanged: (callback) => {
+    ipcRenderer.on('show-today-focus-changed', (event, enabled) => callback(enabled));
   }
 });
 
@@ -54,15 +66,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   sendFocusTime: (time) => {
     ipcRenderer.send('focus-time-update', time);
   }
-});
-
-contextBridge.exposeInMainWorld('audioPlayer', {
-  onPlay: (callback) => ipcRenderer.on('audio-command-play', (event) => callback()),
-  onPause: (callback) => ipcRenderer.on('audio-command-pause', (event) => callback()),
-  onSetVolume: (callback) => ipcRenderer.on('audio-command-volume', (event, volume) => callback(volume)),
-  onChangeStation: (callback) => ipcRenderer.on('audio-command-station', (event, url, type) => callback(url, type)),
-  sendState: (state) => ipcRenderer.send('audio-state-update', state),
-  sendError: (error) => ipcRenderer.send('audio-error', error)
 });
 
 contextBridge.exposeInMainWorld('settingsAPI', {
@@ -92,18 +95,9 @@ contextBridge.exposeInMainWorld('settingsAPI', {
     ipcRenderer.send('set-settings-height', height);
   },
 
-  getLaunchAtStartup: () => {
-    ipcRenderer.send('get-launch-at-startup');
-    return new Promise((resolve) => {
-      ipcRenderer.once('launch-at-startup-data', (event, enabled) => {
-        resolve(enabled);
-      });
-    });
-  },
+  getLaunchAtStartup: () => ipcRenderer.invoke('get-launch-at-startup'),
 
-  setLaunchAtStartup: (enabled) => {
-    ipcRenderer.send('set-launch-at-startup', enabled);
-  },
+  setLaunchAtStartup: (enabled) => ipcRenderer.invoke('set-launch-at-startup', enabled),
 
   getSubtitleConfig: () => {
     ipcRenderer.send('get-subtitle-config');
@@ -116,7 +110,19 @@ contextBridge.exposeInMainWorld('settingsAPI', {
 
   setSubtitleConfig: (config) => {
     ipcRenderer.send('set-subtitle-config', config);
-  }
+  },
+
+  getShowTodayFocus: () => ipcRenderer.invoke('get-show-today-focus'),
+
+  setShowTodayFocus: (enabled) => ipcRenderer.invoke('set-show-today-focus', enabled)
+});
+
+globalThis.addEventListener('online', () => {
+  ipcRenderer.send('network-status-changed', true);
+});
+
+globalThis.addEventListener('offline', () => {
+  ipcRenderer.send('network-status-changed', false);
 });
 
 contextBridge.exposeInMainWorld('historyAPI', {

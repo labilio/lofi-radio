@@ -5,17 +5,16 @@
   "main": "main.js",
   "homepage": "./",
   "scripts": {
+    "test": "node --test test/*.test.js",
+    "benchmark:stations": "node scripts/station-network-benchmark.js",
     "start": "electron . --disable-dev-tools",
     "dev": "electron .",
     "debug": "electron . --enable-logging --log-level=0",
-    "generate-icon": "node generate-icon.js",
     "build": "electron-builder --win",
     "build:mac": "electron-builder --mac",
     "build:all": "electron-builder --win --mac",
     "dist": "electron-builder --win --publish=never",
-    "dist:mac": "electron-builder --mac --publish=never",
-    "pack": "electron-packager . --platform=win32 --arch=x64 --out=dist --overwrite",
-    "pack:mac": "electron-packager . --platform=darwin --arch=x64 --out=dist --overwrite"
+    "dist:mac": "electron-builder --mac --publish=never"
   },
   "keywords": [
     "electron",
@@ -26,9 +25,8 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "electron": "^40.0.0",
-    "electron-builder": "^24.13.3",
-    "electron-packager": "^17.1.2"
+    "electron": "40.8.5",
+    "electron-builder": "26.15.3"
   },
   "build": {
     "appId": "com.lofi-radio-player.app",
@@ -41,12 +39,46 @@
       "output": "dist_green"
     },
     "files": [
-      "**/*",
-      "!dist_green/**/*",
-      "!*.md",
-      "!build/**/*",
-      "!*.ps1",
-      "!*.bat"
+      "package.json",
+      "LICENSE",
+      "icon.ico",
+      "icon.icns",
+      "icon.png",
+      "audio.html",
+      "audio-preload.js",
+      "audio-runtime.js",
+      "audio-window-adapters.js",
+      "audio-window-config.js",
+      "bilibili-media-adapter.js",
+      "history.css",
+      "history.html",
+      "history.js",
+      "index.html",
+      "main.js",
+      "playback-controller.js",
+      "playback-presentation.js",
+      "preload.js",
+      "renderer.js",
+      "settings.css",
+      "settings.html",
+      "settings.js",
+      "stations.json",
+      "startup-service.js",
+      "styles.css",
+      "subpage-foundation.css",
+      "subpage-window.js",
+      "update.css",
+      "update.html",
+      "update-error.html",
+      "update-latest.html",
+      "update-preload.js",
+      "update-service.js",
+      "webawesome-components.js",
+      "widget.js",
+      "window-sizing.js"
+    ],
+    "asarUnpack": [
+      "node_modules/@awesome.me/webawesome/**/*"
     ],
     "win": {
       "icon": "icon.ico",
@@ -97,6 +129,7 @@
     }
   },
   "dependencies": {
-    "@shoelace-style/shoelace": "^2.20.1"
+    "@awesome.me/webawesome": "^3.10.0",
+    "hls.js": "1.6.16"
   }
 }

@@ -3,7 +3,7 @@
 class FocusTimeManager {
     constructor() {
         this.focusTime = 0; // 专注时长（分钟）
-        this.isPlaying = true; // 默认播放状态
+        this.isPlaying = false; // 仅在媒体真实播放时计时
         this.timer = null;
         this.lastDate = null;
         this.init();
@@ -14,7 +14,6 @@ class FocusTimeManager {
         this.checkDateReset();
         this.updateDisplay();
         this.bindEvents();
-        this.startTimer();
 
         // 初始化时发送专注时间给主进程
         setTimeout(() => {
@@ -107,14 +106,15 @@ class FocusTimeManager {
         // 延迟绑定，确保lofiWidget已经初始化
         setTimeout(() => {
             if (window.lofiWidget) {
-                window.lofiWidget.onPlayStateChange((isPlaying) => {
-                    this.isPlaying = isPlaying;
-                    if (isPlaying) {
+                window.lofiWidget.onPlaybackStatusChange((status) => {
+                    this.isPlaying = window.LofiPlaybackPresentation
+                        ? window.LofiPlaybackPresentation.isFocusPlaybackActive(status)
+                        : status.state === 'playing';
+                    if (this.isPlaying) {
                         this.startTimer();
                     } else {
                         this.stopTimer();
                     }
-                    console.log('Play state changed:', isPlaying ? 'playing' : 'paused');
                 });
             } else {
                 console.warn('lofiWidget not found, focus timer may not work properly');
@@ -222,34 +222,6 @@ class FocusTimeManager {
         console.log('Focus time reset');
     }
 }
-
-// TODO: 测试完删除此种子函数
-(function seedTestHistory() {
-    const stored = localStorage.getItem('lofi-focus-history');
-    const history = stored ? JSON.parse(stored) : {};
-    // 合并写入，已有日期的数据不覆盖
-    const seed = {
-        '2026-05-18': 45,
-        '2026-05-19': 120,
-        '2026-05-20': 90,
-        '2026-05-21': 150,
-        '2026-05-22': 80,
-        '2026-05-23': 110
-    };
-    let merged = false;
-    Object.keys(seed).forEach(key => {
-        if (!history[key]) {
-            history[key] = seed[key];
-            merged = true;
-        }
-    });
-    if (merged) {
-        localStorage.setItem('lofi-focus-history', JSON.stringify(history));
-        console.log('Seeded test history data for May 18-23');
-    } else {
-        console.log('History seed skipped: all dates already exist');
-    }
-})();
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', () => {

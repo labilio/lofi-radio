@@ -74,6 +74,8 @@ web_modules/
 
 # dotenv environment variable files
 .env
+.env.*
+!.env.example
 .env.development.local
 .env.test.local
 .env.production.local
@@ -139,17 +141,33 @@ dist
 dist/
 release/
 dist_green/
+.tmp-*
+.superpowers/
+docs/superpowers/
 
 *.exe
 *.asar
+*.bak
+*.tmp
+
+# Test and browser automation output
+test-results/
+playwright-report/
+blob-report/
+benchmark-results/
 
 # macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 
-# Claude Code
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Local AI/editor working files
 .claude/
+.codex/
 
 # Editor directories
 .cursor/
@@ -167,3 +185,9 @@ CHANGELOG-local.md
 
 # Local learnings and notes
 .learnings/
+
+# Signing credentials
+*.pem
+*.key
+*.p12
+*.pfx

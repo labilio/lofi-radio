@@ -1,11 +1,15 @@
 class LofiWidget {
     constructor() {
-        this.isPlaying = true;
+        this.isPlaying = false;
+        this.playbackStatus = { state: 'idle' };
         this.currentVolume = 0.3;
         this.previousVolume = 0.3;
         this.isMuted = false;
         this.isReady = false;
         this.isStationListOpen = false;
+        this.stations = [];
+        this.currentStationIndex = -1;
+        this.statusHideTimer = null;
         this.init();
     }
 
@@ -30,6 +34,7 @@ class LofiWidget {
         this.stationListUl = document.getElementById('stationListUl');
         this.stationTitle = document.getElementById('stationTitle');
         this.panelBackBtn = document.getElementById('panelBackBtn');
+        this.stationPanelTitle = document.getElementById('stationPanelTitle');
         this.subtitleEl = document.querySelector('.subtitle');
         this.currentSubtitleConfig = { mode: 'date', customText: '' };
         this.subtitleTimer = null;
@@ -41,19 +46,9 @@ class LofiWidget {
         }
 
         this.updatePlayButton();
-        this.showStatus('🎵 系统就绪', 'ready');
-        setTimeout(() => this.hideStatus(), 2000);
+        this.updateVinylAnimation();
 
         console.log('Lofi Widget initialized');
-
-        setTimeout(() => {
-            if (window.focusTimeManager) {
-                window.focusTimeManager.isPlaying = this.isPlaying;
-                if (this.isPlaying) {
-                    window.focusTimeManager.startTimer();
-                }
-            }
-        }, 100);
     }
 
     createStatusIndicator() {
@@ -100,6 +95,17 @@ class LofiWidget {
 
     hideStatus() {
         this.statusIndicator.style.opacity = '0';
+    }
+
+    showTransientStatus(message, type = 'info') {
+        this.showStatus(message, type);
+        if (this.statusHideTimer) {
+            clearTimeout(this.statusHideTimer);
+        }
+        this.statusHideTimer = setTimeout(() => {
+            this.statusHideTimer = null;
+            this.hideStatus();
+        }, 1000);
     }
 
     bindEvents() {
@@ -159,18 +165,15 @@ class LofiWidget {
         });
 
         if (window.lofiWidget) {
-            window.lofiWidget.onPlayStateChange((isPlaying) => {
-                const wasPlaying = this.isPlaying;
-                this.isPlaying = isPlaying;
-                this.updatePlayButton();
-                this.updateVinylAnimation();
-
-                if (wasPlaying !== isPlaying && !this.isMiniMode) {
-                    const statusText = this.isPlaying ? '♪ 正在播放' : '🔇 已静音';
-                    this.showStatus(statusText, this.isPlaying ? 'ready' : 'error');
-                    setTimeout(() => this.hideStatus(), 1500);
-                }
-            });
+            if (window.lofiWidget.onPlaybackStatusChange) {
+                window.lofiWidget.onPlaybackStatusChange((status) => {
+                    this.updatePlaybackStatus(status);
+                });
+            } else if (window.lofiWidget.onPlayStateChange) {
+                window.lofiWidget.onPlayStateChange((isPlaying) => {
+                    this.updatePlaybackStatus({ state: isPlaying ? 'playing' : 'paused' });
+                });
+            }
 
             window.lofiWidget.onVolumeChange((volume) => {
                 this.currentVolume = volume;
@@ -195,9 +198,27 @@ class LofiWidget {
                 });
             }
 
+            if (window.lofiWidget.getShowTodayFocus) {
+                window.lofiWidget.getShowTodayFocus()
+                    .then((enabled) => this.updateShowTodayFocus(enabled))
+                    .catch((error) => {
+                        console.error('Failed to load Today Focus visibility:', error);
+                    });
+            }
+
+            if (window.lofiWidget.onShowTodayFocusChanged) {
+                window.lofiWidget.onShowTodayFocusChanged((enabled) => {
+                    this.updateShowTodayFocus(enabled);
+                });
+            }
+
             this.updateSubtitle(this.currentSubtitleConfig);
             this.startSubtitleTimer();
         }
+    }
+
+    updateShowTodayFocus(enabled) {
+        this.widget.classList.toggle('today-focus-hidden', enabled === false);
     }
 
     toggleStationList(forceState = null) {
@@ -225,12 +246,16 @@ class LofiWidget {
 
     updateStationList(stations) {
         if (!this.stationListUl) return;
-        
+
+        this.stations = stations;
         this.stationListUl.innerHTML = '';
         stations.forEach((station, index) => {
             const li = document.createElement('li');
             li.className = 'station-list-item';
             li.dataset.index = index;
+            if (index === this.currentStationIndex && this.playbackStatus.state === 'error') {
+                li.classList.add('failed');
+            }
             
             const nameSpan = document.createElement('span');
             nameSpan.className = 'station-name';
@@ -266,7 +291,7 @@ class LofiWidget {
                 sceneTag.textContent = station.scene;
                 tagsContainer.appendChild(sceneTag);
             }
-            
+
             li.appendChild(nameSpan);
             li.appendChild(tagsContainer);
             
@@ -282,11 +307,15 @@ class LofiWidget {
     }
 
     updateCurrentStation(station, index) {
+        this.currentStationIndex = index;
         if (this.stationListUl) {
             const items = this.stationListUl.querySelectorAll('.station-list-item');
-            items.forEach(item => item.classList.remove('active'));
+            items.forEach(item => item.classList.remove('active', 'failed'));
             if (items[index]) {
                 items[index].classList.add('active');
+                if (this.playbackStatus.state === 'error') {
+                    items[index].classList.add('failed');
+                }
             }
         }
         
@@ -294,10 +323,6 @@ class LofiWidget {
             this.stationTitle.textContent = station.name;
         }
 
-        if (!this.isMiniMode) {
-            this.showStatus(`正在播放: ${station.name}`, 'ready');
-            setTimeout(() => this.hideStatus(), 1500);
-        }
     }
 
     updateSubtitle(config) {
@@ -306,6 +331,15 @@ class LofiWidget {
         }
         if (!this.subtitleEl) return;
 
+        this.renderSubtitle();
+    }
+
+    renderSubtitle() {
+        if (!this.subtitleEl) return;
+
+        const presentation = window.LofiPlaybackPresentation
+            ? window.LofiPlaybackPresentation.getPlaybackPresentation(this.playbackStatus)
+            : { subtitle: null };
         const { mode, customText } = this.currentSubtitleConfig;
         let text = '';
 
@@ -322,8 +356,11 @@ class LofiWidget {
                 break;
         }
 
-        this.subtitleEl.textContent = text;
-        this.subtitleEl.title = (mode === 'custom' && text.length > 0) ? text : '';
+        const visibleText = presentation.subtitle || text;
+        this.subtitleEl.textContent = visibleText;
+        this.subtitleEl.title = presentation.subtitle
+            ? visibleText
+            : (mode === 'custom' && text.length > 0) ? text : '';
     }
 
     getGreeting() {
@@ -357,20 +394,56 @@ class LofiWidget {
 
     togglePlayPause() {
         if (window.lofiWidget) {
-            window.lofiWidget.togglePlayPause();
-            this.isPlaying = !this.isPlaying;
-            this.updatePlayButton();
-            this.updateVinylAnimation();
-
-            const statusText = this.isPlaying ? '♪ 正在播放' : '🔇 已静音';
-            this.showStatus(statusText, this.isPlaying ? 'ready' : 'error');
-            setTimeout(() => this.hideStatus(), 1500);
-
-            this.playPauseBtn.title = this.isPlaying ? '点击唱片暂停播放' : '点击唱片恢复播放';
+            if (this.playbackStatus.state === 'error' && window.lofiWidget.retryPlayback) {
+                window.lofiWidget.retryPlayback();
+            } else {
+                window.lofiWidget.togglePlayPause();
+            }
         } else {
             this.showStatus('控制接口不可用', 'error');
             setTimeout(() => this.hideStatus(), 2000);
         }
+    }
+
+    updatePlaybackStatus(status) {
+        this.playbackStatus = status || { state: 'idle' };
+        const presentation = window.LofiPlaybackPresentation
+            ? window.LofiPlaybackPresentation.getPlaybackPresentation(this.playbackStatus)
+            : {
+                isPlaying: this.playbackStatus.state === 'playing',
+                isError: this.playbackStatus.state === 'error'
+            };
+
+        this.isPlaying = presentation.isPlaying;
+        this.widget.classList.toggle('playback-error', presentation.isError);
+        this.playPauseBtn.classList.toggle('playback-error', presentation.isError);
+        this.miniPlayBtn.classList.toggle('playback-error', presentation.isError);
+        this.stationListBtn?.classList.toggle('has-playback-error', presentation.isError);
+
+        if (this.stationListUl) {
+            const items = this.stationListUl.querySelectorAll('.station-list-item');
+            items.forEach((item, index) => {
+                item.classList.toggle(
+                    'failed',
+                    presentation.isError && index === this.currentStationIndex
+                );
+            });
+        }
+
+        const title = presentation.isError
+            ? '连接失败，点击重试'
+            : this.playbackStatus.state === 'paused'
+                ? '点击恢复播放'
+                : '点击暂停播放';
+        this.playPauseBtn.title = title;
+        this.miniPlayBtn.title = title;
+        this.widget.title = this.isMiniMode && presentation.isError
+            ? '电台连接失败，点击播放按钮重试'
+            : '';
+
+        this.updatePlayButton();
+        this.updateVinylAnimation();
+        this.renderSubtitle();
     }
 
     setVolume(volume) {
@@ -385,8 +458,10 @@ class LofiWidget {
         if (window.lofiWidget) {
             window.lofiWidget.setVolume(volume);
             const volumePercent = Math.round(volume * 100);
-            this.showStatus(`音量: ${volumePercent}%`, 'info');
-            setTimeout(() => this.hideStatus(), 1000);
+            const statusText = volumePercent === 0
+                ? '🔇 已静音'
+                : `音量: ${volumePercent}%`;
+            this.showTransientStatus(statusText, volumePercent === 0 ? 'error' : 'info');
         }
     }
 
@@ -404,8 +479,7 @@ class LofiWidget {
         if (window.lofiWidget) {
             window.lofiWidget.setVolume(this.currentVolume);
             const statusText = this.isMuted ? '🔇 已静音' : `音量: ${Math.round(this.currentVolume * 100)}%`;
-            this.showStatus(statusText, this.isMuted ? 'error' : 'info');
-            setTimeout(() => this.hideStatus(), 1000);
+            this.showTransientStatus(statusText, this.isMuted ? 'error' : 'info');
         }
     }
 

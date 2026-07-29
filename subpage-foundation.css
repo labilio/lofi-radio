@@ -1,0 +1,72 @@
+:root {
+    --subpage-title-size: 22px;
+    --subpage-section-size: 14px;
+    --subpage-body-size: 13px;
+    --subpage-control-size: 13px;
+    --subpage-caption-size: 11px;
+}
+
+.subpage-frame {
+    width: 100%;
+    padding: 18px 20px 16px;
+}
+
+.subpage-header {
+    min-height: 54px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 0 2px;
+    app-region: drag;
+    -webkit-app-region: drag;
+}
+
+.subpage-heading {
+    display: grid;
+    gap: 3px;
+}
+
+.product-label {
+    display: block;
+    color: var(--signal);
+    font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.14em;
+}
+
+.subpage-header h1 {
+    margin: 0;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: var(--subpage-title-size);
+    font-weight: 660;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+}
+
+.subpage-header .close-btn {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    border-radius: 10px;
+    color: #8d96ab;
+    background: rgba(255, 255, 255, 0.055);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 20px;
+    line-height: 1;
+    transition: color 120ms ease, background 120ms ease;
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
+}
+
+.subpage-header .close-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}

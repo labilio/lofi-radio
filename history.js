@@ -9,6 +9,9 @@ class HistoryManager {
         this.closeBtn = document.getElementById('closeBtn');
         this.viewToggle = document.getElementById('viewToggle');
         this.chartContainer = document.getElementById('chartContainer');
+        this.summaryPeriod = document.getElementById('summaryPeriod');
+        this.summaryTotal = document.getElementById('summaryTotal');
+        this.summaryToday = document.getElementById('summaryToday');
 
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'chart-tooltip';
@@ -17,20 +20,6 @@ class HistoryManager {
         this.bindEvents();
         this.renderChart();
         this.startPolling();
-        this.autoFitWindow();
-    }
-
-    autoFitWindow() {
-        Promise.all([
-            customElements.whenDefined('sl-button')
-        ]).then(() => {
-            requestAnimationFrame(() => {
-                const height = document.documentElement.scrollHeight;
-                if (window.historyAPI && window.historyAPI.setContentHeight) {
-                    window.historyAPI.setContentHeight(height);
-                }
-            });
-        });
     }
 
     bindEvents() {
@@ -58,10 +47,10 @@ class HistoryManager {
     setActiveCapsule(view) {
         this.viewToggle.querySelectorAll('.capsule-option').forEach(btn => {
             if (btn.dataset.view === view) {
-                btn.variant = 'primary';
+                btn.variant = 'brand';
                 btn.classList.add('active');
             } else {
-                btn.variant = 'default';
+                btn.variant = 'neutral';
                 btn.classList.remove('active');
             }
         });
@@ -110,13 +99,6 @@ class HistoryManager {
         return (date.getMonth() + 1) + '/' + date.getDate();
     }
 
-    formatTooltip(date, value) {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        return days[date.getDay()] + ', ' + months[date.getMonth()] + ' ' + date.getDate() + ' — ' + value + ' min';
-    }
-
     isTickVisible(index, total) {
         if (total <= 7) return true;
         // 首尾始终显示
@@ -152,6 +134,12 @@ class HistoryManager {
         });
 
         const maxVal = Math.max(...values, 1);
+        const totalFocus = values.reduce((total, value) => total + value, 0);
+
+        this.summaryPeriod.textContent =
+            this.currentView === 'week' ? '近 7 天累计' : '近 30 天累计';
+        this.summaryTotal.textContent = String(totalFocus);
+        this.summaryToday.textContent = String(values[values.length - 1] || 0);
 
         this.chartContainer.innerHTML = '';
 
@@ -185,28 +173,23 @@ class HistoryManager {
                 dateLabel.classList.add('hidden-tick');
             }
 
-            // 自定义 tooltip：仅月视图悬浮显示时长
-            if (isMonth) {
-                bar.addEventListener('mouseenter', (e) => {
-                    const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                               'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    const dateStr = m[date.getMonth()] + ' ' + date.getDate();
-                    this.tooltip.innerHTML = dateStr + '<br>' + value + ' min';
-                    this.tooltip.classList.add('visible');
-                });
-                bar.addEventListener('mousemove', (e) => {
-                    const tw = this.tooltip.offsetWidth;
-                    const margin = 12;
-                    const left = e.clientX + tw + margin > window.innerWidth
-                        ? e.clientX - tw - margin
-                        : e.clientX + margin;
-                    this.tooltip.style.left = left + 'px';
-                    this.tooltip.style.top = (e.clientY - 36) + 'px';
-                });
-                bar.addEventListener('mouseleave', () => {
-                    this.tooltip.classList.remove('visible');
-                });
-            }
+            bar.addEventListener('mouseenter', () => {
+                const dateStr = (date.getMonth() + 1) + '月' + date.getDate() + '日';
+                this.tooltip.innerHTML = dateStr + '<br>' + value + ' 分钟';
+                this.tooltip.classList.add('visible');
+            });
+            bar.addEventListener('mousemove', (e) => {
+                const tw = this.tooltip.offsetWidth;
+                const margin = 12;
+                const left = e.clientX + tw + margin > window.innerWidth
+                    ? e.clientX - tw - margin
+                    : e.clientX + margin;
+                this.tooltip.style.left = left + 'px';
+                this.tooltip.style.top = (e.clientY - 36) + 'px';
+            });
+            bar.addEventListener('mouseleave', () => {
+                this.tooltip.classList.remove('visible');
+            });
 
             wrapper.appendChild(label);
             wrapper.appendChild(bar);

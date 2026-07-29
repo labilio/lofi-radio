@@ -4,28 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>专注历史 - Lofi Radio Player</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/themes/dark.css">
+    <link rel="stylesheet" href="node_modules/@awesome.me/webawesome/dist-cdn/styles/themes/shoelace.css">
+    <link rel="stylesheet" href="subpage-foundation.css">
     <link rel="stylesheet" href="history.css">
 </head>
-<body class="sl-theme-dark">
-    <button class="close-btn" id="closeBtn">&times;</button>
+<body class="wa-theme-shoelace wa-palette-shoelace wa-dark">
+    <div class="history-page subpage-frame">
+        <header class="titlebar subpage-header">
+            <div class="subpage-heading">
+                <span class="product-label">LOFI RADIO</span>
+                <h1>专注历史</h1>
+            </div>
+            <button class="close-btn" id="closeBtn" type="button" aria-label="关闭">&times;</button>
+        </header>
 
-    <div class="history-container">
-        <div class="history-header">
-            <h1>专注历史</h1>
-        </div>
+        <main class="history-container">
+        <section class="summary-panel" aria-label="专注时长汇总">
+            <div class="summary-block">
+                <span class="summary-label">今日专注</span>
+                <div class="summary-reading">
+                    <span class="summary-value" id="summaryToday">0</span>
+                    <span class="summary-unit">分钟</span>
+                </div>
+            </div>
+            <div class="summary-divider" aria-hidden="true"></div>
+            <div class="summary-block">
+                <span class="summary-label" id="summaryPeriod">近 7 天累计</span>
+                <div class="summary-reading">
+                    <span class="summary-value" id="summaryTotal">0</span>
+                    <span class="summary-unit">分钟</span>
+                </div>
+            </div>
+        </section>
 
         <div class="capsule-group" id="viewToggle">
-            <sl-button class="capsule-option active" data-view="week" variant="primary" size="small">过去一周</sl-button>
-            <sl-button class="capsule-option" data-view="month" variant="default" size="small">过去一月</sl-button>
+            <wa-button class="capsule-option active" data-view="week" variant="brand" size="s">过去一周</wa-button>
+            <wa-button class="capsule-option" data-view="month" variant="neutral" size="s">过去一月</wa-button>
         </div>
 
-        <div class="chart-container" id="chartContainer">
+        <section class="chart-container" id="chartContainer" aria-label="专注时长柱状图">
             <div class="chart-placeholder">加载中...</div>
-        </div>
+        </section>
+        </main>
     </div>
 
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.15.0/cdn/shoelace-autoloader.js"></script>
+    <script type="module" src="webawesome-components.js"></script>
     <script src="history.js"></script>
 </body>
 </html>

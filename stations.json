@@ -5,9 +5,8 @@
     "type": "bilibili",
     "url": "https://live.bilibili.com/27519423?live_from=84001&spm_id_from=333.337.0.0",
     "style1": "Lo-fi",
-    "style2": "Chill",
-    "scene": "学习",
-    "custom": "最稳定"
+    "style2": "Hip-Hop",
+    "scene": "学习"
   },
   {
     "name": "Lofi Box",
@@ -15,26 +14,14 @@
     "type": "mp3",
     "url": "https://boxradio-edge-00.streamafrica.net/lofi",
     "style1": "Lo-fi",
-    "style2": "Chill",
-    "scene": "学习",
-    "custom": "高性能"
-  },
-  {
-    "name": "Chill Sky",
-    "category": "Chill",
-    "type": "mp3",
-    "url": "http://chill.radioca.st/stream",
-    "style1": "Chill",
-    "style2": "Electro",
-    "scene": "阅读"
+    "scene": "学习"
   },
   {
     "name": "Chill Wave",
     "category": "Chill",
     "type": "mp3",
     "url": "https://boxradio-edge-00.streamafrica.net/chillwave",
-    "style1": "Chill",
-    "style2": "Electro",
+    "style1": "Chillwave",
     "scene": "放松"
   },
   {
@@ -42,9 +29,9 @@
     "category": "Chill",
     "type": "mp3",
     "url": "https://ice1.somafm.com/groovesalad-128-mp3",
-    "style1": "Chill",
+    "style1": "Downtempo",
     "style2": "Ambient",
-    "scene": "编码"
+    "scene": "工作"
   },
   {
     "name": "ASP",
@@ -52,7 +39,7 @@
     "type": "mp3",
     "url": "http://radio.stereoscenic.com/asp-s",
     "style1": "Ambient",
-    "style2": "Sleep",
+    "style2": "Beat-free",
     "scene": "助眠"
   },
   {
@@ -60,26 +47,26 @@
     "category": "Chill",
     "type": "mp3",
     "url": "https://stream.radioparadise.com/mellow-128",
-    "style1": "Chill",
-    "style2": "Alt",
-    "scene": "休闲"
+    "style1": "Mellow",
+    "style2": "Eclectic",
+    "scene": "放松"
   },
   {
     "name": "Drone Zone",
     "category": "Chill",
     "type": "mp3",
     "url": "https://ice1.somafm.com/dronezone-128-mp3",
-    "style1": "Ambient",
-    "style2": "Deep",
-    "scene": "催眠"
+    "style1": "Drone",
+    "style2": "Ambient",
+    "scene": "助眠"
   },
   {
     "name": "Rain Sounds",
     "category": "Ambient",
     "type": "mp3",
     "url": "https://boxradio-edge-01.streamafrica.net/rain",
-    "style1": "Ambient",
-    "style2": "Nature",
+    "style1": "Rain",
+    "style2": "Thunderstorm",
     "scene": "助眠"
   },
   {
@@ -88,7 +75,6 @@
     "type": "mp3",
     "url": "https://boxradio-edge-01.streamafrica.net/jazz",
     "style1": "Jazz",
-    "style2": "Smooth",
     "scene": "阅读"
   },
   {
@@ -97,8 +83,8 @@
     "type": "mp3",
     "url": "http://west-mp3-128.streamthejazzgroove.com/stream",
     "style1": "Jazz",
-    "style2": "Groove",
-    "scene": "写作"
+    "style2": "Laid-back",
+    "scene": "工作"
   },
   {
     "name": "Jazz Smooth",
@@ -106,8 +92,8 @@
     "type": "mp3",
     "url": "http://smoothjazz.cdnstream1.com/2585_128.mp3",
     "style1": "Jazz",
-    "style2": "Mellow",
-    "scene": "办公"
+    "style2": "Soul",
+    "scene": "工作"
   },
   {
     "name": "Swiss Classic",
@@ -115,16 +101,15 @@
     "type": "mp3",
     "url": "http://stream.srg-ssr.ch/m/rsc_de/mp3_128",
     "style1": "Classical",
-    "style2": "Symphony",
-    "scene": "专注"
+    "scene": "学习"
   },
   {
     "name": "BBC 3",
     "category": "Classical",
     "type": "m3u8",
-    "url": "http://as-hls-ww-live.akamaized.net/pool_904/live/ww/bbc_radio_three/bbc_radio_three.isml/bbc_radio_three-audio=320000.m3u8",
+    "url": "https://a.files.bbci.co.uk/ms6/live/3441A116-B12E-4D2F-ACA8-C1984642FA4B/audio/simulcast/hls/nonuk/audio_syndication_low_sbr_v1/aks/bbc_radio_three.m3u8",
     "style1": "Classical",
-    "style2": "Arts",
+    "style2": "Jazz",
     "scene": "探索"
   },
   {
@@ -133,7 +118,7 @@
     "type": "mp3",
     "url": "https://boxradio-edge-00.streamafrica.net/rap",
     "style1": "Hip-Hop",
-    "style2": "Beats",
+    "style2": "Rap",
     "scene": "运动"
   },
   {
@@ -141,8 +126,61 @@
     "category": "Rock/Indie",
     "type": "mp3",
     "url": "https://kexp-mp3-128.streamguys1.com/kexp128.mp3",
-    "style1": "Indie",
-    "style2": "Alt",
-    "scene": "娱乐"
+    "style1": "Rock",
+    "style2": "Eclectic",
+    "scene": "探索"
+  },
+  {
+    "name": "FluxFM ChillHop",
+    "category": "Lo-Fi",
+    "type": "mp3",
+    "url": "https://streams.fluxfm.de/Chillhop/mp3-128/streams.fluxfm.de/",
+    "style1": "Chillhop",
+    "style2": "Lo-fi",
+    "scene": "学习"
+  },
+  {
+    "name": "FluxFM Chillout",
+    "category": "Chill",
+    "type": "mp3",
+    "url": "https://streams.fluxfm.de/chillout/mp3-128/streams.fluxfm.de/",
+    "style1": "Chillout",
+    "scene": "工作"
+  },
+  {
+    "name": "Chillsynth FM",
+    "category": "Chill",
+    "type": "mp3",
+    "url": "https://stream.nightride.fm/chillsynth.mp3",
+    "style1": "Chillsynth",
+    "style2": "Synthwave",
+    "scene": "工作"
+  },
+  {
+    "name": "Lofi Mix",
+    "category": "Lo-Fi",
+    "type": "mp3",
+    "url": "https://stream.laut.fm/lofi-radio",
+    "style1": "Lo-fi",
+    "style2": "Lounge",
+    "scene": "工作"
+  },
+  {
+    "name": "Lofi Study",
+    "category": "Lo-Fi",
+    "type": "mp3",
+    "url": "https://stream.laut.fm/lofi",
+    "style1": "Lo-fi",
+    "style2": "Chillout",
+    "scene": "学习"
+  },
+  {
+    "name": "Loungetunes",
+    "category": "Jazz",
+    "type": "mp3",
+    "url": "https://stream.laut.fm/loungetunes",
+    "style1": "Jazzhop",
+    "style2": "Chillhop",
+    "scene": "阅读"
   }
 ]

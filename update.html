@@ -4,171 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>发现新版本</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .update-container {
-            text-align: center;
-            padding: 40px 30px;
-            max-width: 360px;
-        }
-
-        .update-icon {
-            font-size: 56px;
-            margin-bottom: 16px;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-8px);
-            }
-            60% {
-                transform: translateY(-4px);
-            }
-        }
-
-        .update-title {
-            font-size: 22px;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 8px;
-        }
-
-        .version-info {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 28px;
-            line-height: 1.8;
-        }
-
-        .version-new {
-            color: #4a9eff;
-            font-weight: 500;
-        }
-
-        .version-current {
-            color: #666;
-        }
-
-        .update-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border: none;
-        }
-
-        .btn-primary {
-            background: #4a9eff;
-            color: #fff;
-            width: 100%;
-        }
-
-        .btn-primary:hover {
-            background: #3a8eef;
-            transform: translateY(-1px);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-        }
-
-        .btn-link {
-            background: transparent;
-            color: #4a9eff;
-            font-size: 13px;
-            padding: 8px 12px;
-        }
-
-        .btn-link:hover {
-            color: #6ab0ff;
-        }
-
-        .btn-skip {
-            background: transparent;
-            color: #888;
-            font-size: 13px;
-            padding: 8px 12px;
-        }
-
-        .btn-skip:hover {
-            color: #aaa;
-        }
-    </style>
+    <link rel="stylesheet" href="subpage-foundation.css">
+    <link rel="stylesheet" href="update.css">
 </head>
-<body>
-    <div class="update-container">
-        <div class="update-icon">🎁</div>
-        <h1 class="update-title">发现新版本</h1>
-        <p class="version-info">
-            <span class="version-current">当前版本: v<span id="currentVersion"></span></span><br>
-            <span class="version-new">最新版本: v<span id="latestVersion"></span></span>
-        </p>
+<body data-state="available">
+    <div class="update-page subpage-frame">
+        <header class="titlebar subpage-header">
+            <div class="subpage-heading">
+                <span class="product-label">LOFI RADIO</span>
+                <h1 id="updateTitle">发现新版本</h1>
+            </div>
+            <button class="close-btn" id="closeBtn" type="button" aria-label="关闭">&times;</button>
+        </header>
 
-        <div class="update-buttons">
-            <button class="btn btn-primary" id="downloadBtn">立即下载</button>
-            <div class="btn-row">
-                <button class="btn btn-link" id="viewChangesBtn">查看更新内容</button>
-                <button class="btn btn-skip" id="skipBtn">不再提醒</button>
+        <main class="update-shell">
+            <section aria-labelledby="updateTitle">
+            <p class="message">新版本已经发布，可以前往 GitHub 下载。</p>
+            </section>
+
+        <div class="version-rail" aria-label="版本对比">
+            <div class="version-block">
+                <span class="version-caption">当前版本</span>
+                <span class="version-value">v<span id="currentVersion"></span></span>
+            </div>
+            <span class="version-arrow" aria-hidden="true">→</span>
+            <div class="version-block is-new">
+                <span class="version-caption">可用版本</span>
+                <span class="version-value">v<span id="latestVersion"></span></span>
             </div>
         </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="downloadBtn" type="button">前往下载</button>
+            <button class="btn btn-secondary" id="viewChangesBtn" type="button">
+                查看更新内容
+                <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M14 4h6v6M10 14 20 4M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>
+                </svg>
+            </button>
+            <button class="btn btn-quiet" id="skipBtn" type="button">不再提醒</button>
+        </div>
+        </main>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
-        const currentVersion = urlParams.get('current');
-        const latestVersion = urlParams.get('latest');
+        const currentVersion = urlParams.get('current') || '—';
+        const latestVersion = urlParams.get('latest') || '—';
         const releaseUrl = urlParams.get('url');
 
         document.getElementById('currentVersion').textContent = currentVersion;
         document.getElementById('latestVersion').textContent = latestVersion;
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
-            if (window.updateAPI && window.updateAPI.download) {
-                window.updateAPI.download(releaseUrl);
-            }
+            window.updateAPI?.download(releaseUrl);
         });
 
         document.getElementById('viewChangesBtn').addEventListener('click', () => {
-            if (window.updateAPI && window.updateAPI.viewChanges) {
-                window.updateAPI.viewChanges();
-            }
+            window.updateAPI?.viewChanges();
         });
 
         document.getElementById('skipBtn').addEventListener('click', () => {
-            if (window.updateAPI && window.updateAPI.skip) {
-                window.updateAPI.skip();
-            }
+            window.updateAPI?.skip();
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            window.updateAPI?.close();
         });
     </script>
 </body>

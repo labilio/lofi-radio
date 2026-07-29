@@ -363,6 +363,10 @@ body, html {
     color: rgba(255, 218, 185, 0.7); /* 略微强调数字 */
 }
 
+.widget.today-focus-hidden .focus-time-display {
+    display: none;
+}
+
 /* 关闭按钮 - 精致复古设计 */
 .close-btn {
     -webkit-app-region: no-drag;
@@ -976,4 +980,45 @@ body, html {
 
 .status-indicator {
     /* 不设置 -webkit-app-region，让它继承父元素的 drag */
+}
+
+/* Playback reliability feedback reuses existing controls without changing layout. */
+.vinyl-record.playback-error {
+    filter:
+        drop-shadow(0 0 12px rgba(248, 113, 113, 0.45))
+        drop-shadow(0 0 24px rgba(239, 68, 68, 0.2));
+}
+
+.vinyl-record.playback-error .record-label {
+    background:
+        radial-gradient(circle at 25% 25%, rgba(254, 202, 202, 0.2) 0%, transparent 50%),
+        linear-gradient(135deg, #8d5f5f, #654747, #493737);
+}
+
+.station-list-btn.has-playback-error::after {
+    content: "";
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #f87171;
+    box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.95);
+}
+
+.station-list-item.failed::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: #f87171;
+    box-shadow: 0 0 8px rgba(248, 113, 113, 0.55);
+    flex: 0 0 auto;
+}
+
+.mini-play-btn.playback-error {
+    background: rgba(239, 68, 68, 0.22);
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.35);
 }

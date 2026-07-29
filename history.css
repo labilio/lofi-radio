@@ -1,220 +1,265 @@
+:root {
+    color-scheme: dark;
+    --night: #171c31;
+    --panel: #20263d;
+    --control: #2a314a;
+    --line: rgba(255, 255, 255, 0.085);
+    --text: #f2f5fb;
+    --muted: #9099ae;
+    --signal: #4a9eff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--night);
+    color: var(--text);
+}
+
 * {
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
+html,
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    color: #e0e0e0;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
+    margin: 0;
     overflow: hidden;
-    position: relative;
 }
 
-/* Shoelace 主题覆写 */
-.sl-theme-dark {
-    --sl-color-primary-600: #4a9eff;
-    --sl-color-primary-500: #4a9eff;
-    --sl-color-primary-400: #6ab0ff;
-    --sl-color-primary-700: #3a8eef;
-    --sl-input-background-color: rgba(255, 255, 255, 0.1);
-    --sl-input-border-color: rgba(255, 255, 255, 0.2);
-    --sl-input-color: #fff;
-    --sl-input-font-size-small: 13px;
-    --sl-border-radius-small: 6px;
-    --sl-border-radius-medium: 8px;
-    --sl-border-radius-large: 12px;
+body {
+    background:
+        radial-gradient(circle at 10% 0%, rgba(74, 158, 255, 0.1), transparent 38%),
+        linear-gradient(145deg, #171c31, #1a2138);
 }
 
-sl-button[variant="default"]::part(base) {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #ccc;
-}
-sl-button[variant="default"]::part(base):hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 255, 255, 0.22);
-    color: #fff;
+.wa-theme-shoelace.wa-dark {
+    --wa-color-brand-fill-loud: var(--signal);
+    --wa-color-brand-border-loud: var(--signal);
+    --wa-color-focus: var(--signal);
+    --wa-border-radius-s: 8px;
+    --wa-border-radius-m: 10px;
 }
 
-sl-button[variant="primary"]::part(base) {
-    background: #4a9eff;
-    border-color: #4a9eff;
-    color: #fff;
-}
-sl-button[variant="primary"]::part(base):hover {
-    background: #3a8eef;
-    border-color: #3a8eef;
-}
-
-sl-button[size="small"]::part(base) {
-    font-size: 13px;
-}
-
-.capsule-group {
-    display: flex;
-    width: 100%;
-    background: rgba(255, 255, 255, 0.06);
-    border-radius: 25px;
-    padding: 3px;
-    gap: 2px;
-    flex-shrink: 0;
-}
-.capsule-group sl-button {
-    flex: 1;
-}
-.capsule-group sl-button::part(base) {
-    width: 100%;
-    justify-content: center;
-    border-radius: 22px;
-    font-size: 13px;
-    border: none;
-    transition: all 0.2s ease;
-}
-.capsule-group sl-button[variant="default"]::part(base) {
-    background: transparent;
-    color: #999;
-}
-.capsule-group sl-button[variant="default"]::part(base):hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: #ccc;
-}
-
-.close-btn {
-    position: absolute;
-    top: 15px;
-    right: 18px;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #999;
-    font-size: 16px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-    z-index: 10;
-    -webkit-app-region: no-drag;
-}
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
-}
-
-.history-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    max-width: 400px;
-    margin: 0 auto;
-    padding: 24px 20px 0;
-}
-
-.history-header {
-    flex-shrink: 0;
-    text-align: center;
-    margin-bottom: 18px;
-    margin-right: 46px;
+.history-page {
+    height: 100%;
+    user-select: none;
+    app-region: drag;
     -webkit-app-region: drag;
 }
 
-.history-header h1 {
-    font-size: 18px;
+.summary-value,
+.bar-label,
+.bar-date {
+    font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.history-container {
+    height: calc(100% - 54px);
+    display: flex;
+    flex-direction: column;
+    padding: 0 4px;
+}
+
+.summary-panel {
+    min-height: 54px;
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    align-items: center;
+    gap: 15px;
+    padding: 2px 4px 8px;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+}
+
+.summary-block {
+    display: grid;
+    gap: 3px;
+}
+
+.summary-block:last-child {
+    text-align: right;
+}
+
+.summary-label {
+    color: #7f899f;
+    font-size: 12px;
+    line-height: 1.3;
+}
+
+.summary-reading {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.summary-block:last-child .summary-reading {
+    justify-content: flex-end;
+}
+
+.summary-value {
+    color: #d9e0ec;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.summary-unit {
+    color: #778197;
+    font-size: var(--subpage-caption-size);
+}
+
+.summary-divider {
+    width: 1px;
+    height: 30px;
+    background: var(--line);
+}
+
+.capsule-group {
+    min-height: 34px;
+    display: flex;
+    flex: 0 0 auto;
+    gap: 2px;
+    margin-top: 5px;
+    padding: 3px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.045);
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
+}
+
+.capsule-group wa-button {
+    flex: 1;
+}
+
+.capsule-group wa-button::part(base) {
+    width: 100%;
+    min-height: 28px;
+    justify-content: center;
+    border: 0;
+    border-radius: 8px;
+    font-size: var(--subpage-control-size);
     font-weight: 600;
+    transition: color 120ms ease, background 120ms ease;
+}
+
+.capsule-group wa-button[variant="brand"]::part(base) {
     color: #fff;
+    background: rgba(74, 158, 255, 0.88);
+}
+
+.capsule-group wa-button[variant="neutral"]::part(base) {
+    color: #8791a7;
+    background: transparent;
+}
+
+.capsule-group wa-button[variant="neutral"]::part(base):hover {
+    color: #c8cfdd;
+    background: rgba(255, 255, 255, 0.055);
 }
 
 .chart-container {
-    flex: 1;
+    min-height: 0;
     display: flex;
+    flex: 1;
     align-items: flex-end;
     justify-content: center;
     gap: 12px;
-    padding: 24px 8px 20px;
-    margin-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    min-height: 0;
+    margin-top: 10px;
+    padding: 13px 4px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.055);
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
 }
 
 .chart-placeholder {
-    color: #666;
-    font-size: 14px;
     align-self: center;
+    color: #687287;
+    font-size: var(--subpage-body-size);
 }
 
-/* 柱状图 */
 .bar-group {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
     min-width: 0;
     height: 100%;
-}
-
-.bar-label {
-    font-size: 12px;
-    color: #aaa;
-    font-weight: 500;
-    text-align: center;
-    margin-bottom: 4px;
-    white-space: nowrap;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
 }
 
 .bar-wrapper {
-    flex: 1;
+    min-height: 0;
     width: 100%;
     display: flex;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    min-height: 0;
+}
+
+.bar-label {
+    min-height: 13px;
+    margin-bottom: 4px;
+    color: #8c96aa;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 13px;
+    text-align: center;
+    white-space: nowrap;
 }
 
 .bar {
     width: 100%;
-    max-width: 36px;
-    min-height: 3px;
-    border-radius: 4px 4px 0 0;
-    transition: height 0.3s ease;
-    background: rgba(255, 255, 255, 0.15);
+    max-width: 34px;
+    min-height: 2px;
     position: relative;
+    border-radius: 4px 4px 2px 2px;
+    background: rgba(122, 147, 184, 0.22);
+    transition: height 180ms ease, background 120ms ease;
+}
+
+.bar:hover {
+    background: rgba(137, 165, 205, 0.38);
 }
 
 .bar.today {
-    background: #4a9eff;
+    background: var(--signal);
+    box-shadow: 0 0 16px rgba(74, 158, 255, 0.16);
 }
 
-/* 今天的数值标签和日期也高亮，形成统一整体 */
-.bar-wrapper:has(.bar.today) .bar-label {
-    color: #4a9eff;
-}
-
+.bar-wrapper:has(.bar.today) .bar-label,
 .bar-group:has(.bar.today) .bar-date {
-    color: #4a9eff;
+    color: #79b8ff;
 }
 
-/* 悬浮提示卡片 */
+.bar-date {
+    min-height: 13px;
+    color: #69738a;
+    font-size: 10px;
+    line-height: 13px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.bar-date.hidden-tick {
+    visibility: hidden;
+}
+
 .chart-tooltip {
     position: fixed;
-    padding: 6px 12px;
-    background: rgba(10, 10, 20, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    color: #e0e0e0;
-    font-size: 12px;
+    z-index: 100;
+    padding: 6px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #dce2ed;
+    background: rgba(13, 17, 30, 0.96);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
+    font-size: var(--subpage-caption-size);
+    line-height: 1.5;
     white-space: nowrap;
     pointer-events: none;
     opacity: 0;
     transform: translateY(4px);
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 100;
+    transition: opacity 120ms ease, transform 120ms ease;
 }
 
 .chart-tooltip.visible {
@@ -222,14 +267,16 @@ sl-button[size="small"]::part(base) {
     transform: translateY(0);
 }
 
-.bar-date {
-    font-size: 11px;
-    color: #777;
-    text-align: center;
-    min-height: 14px;
-    white-space: nowrap;
+button:focus-visible,
+wa-button:focus-visible {
+    outline: 2px solid #78b7ff;
+    outline-offset: 2px;
 }
 
-.bar-date.hidden-tick {
-    visibility: hidden;
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        transition-duration: 0.01ms !important;
+    }
 }

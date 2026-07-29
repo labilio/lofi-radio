@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>检查更新</title>
+    <link rel="stylesheet" href="subpage-foundation.css">
+    <link rel="stylesheet" href="update.css">
+</head>
+<body data-state="error">
+    <div class="update-page subpage-frame">
+        <header class="titlebar subpage-header">
+            <div class="subpage-heading">
+                <span class="product-label">LOFI RADIO</span>
+                <h1 id="updateTitle">暂时无法检查更新</h1>
+            </div>
+            <button class="close-btn" id="closeBtn" type="button" aria-label="关闭">&times;</button>
+        </header>
+
+        <main class="update-shell">
+            <section aria-labelledby="updateTitle">
+            <p class="message" id="errorMessage"></p>
+            </section>
+
+        <div class="status-panel">
+            <span class="status-code">RETRY</span>
+            <span>不会影响当前版本使用，可以稍后重新检查。</span>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" id="retryBtn" type="button">重新检查</button>
+            <button class="btn btn-secondary" id="viewChangesBtn" type="button">
+                查看发布页
+                <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M14 4h6v6M10 14 20 4M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>
+                </svg>
+            </button>
+        </div>
+        </main>
+    </div>
+
+    <script>
+        const reason = new URLSearchParams(window.location.search).get('reason') || 'request-failed';
+        const messages = {
+            'rate-limited': 'GitHub 暂时限制了检查频率，请稍后再试。',
+            offline: '网络连接不可用，请检查网络后重试。',
+            timeout: '连接 GitHub 超时，请稍后重试。',
+            'service-unavailable': 'GitHub 更新服务暂时不可用，请稍后再试。',
+            'invalid-response': 'GitHub 返回了无法识别的版本信息。',
+            'request-failed': '暂时无法连接更新服务，请稍后重试。'
+        };
+
+        document.getElementById('errorMessage').textContent =
+            messages[reason] || messages['request-failed'];
+
+        document.getElementById('retryBtn').addEventListener('click', () => {
+            window.updateAPI?.retry();
+        });
+
+        document.getElementById('viewChangesBtn').addEventListener('click', () => {
+            window.updateAPI?.viewChanges();
+        });
+
+        document.getElementById('closeBtn').addEventListener('click', () => {
+            window.updateAPI?.close();
+        });
+    </script>
+</body>
+</html>
