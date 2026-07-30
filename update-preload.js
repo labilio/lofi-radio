@@ -10,8 +10,8 @@ contextBridge.exposeInMainWorld('updateAPI', {
   viewRepository: () => {
     ipcRenderer.send('update-view-repository');
   },
-  skip: () => {
-    ipcRenderer.send('update-skip');
+  skip: (version) => {
+    ipcRenderer.send('update-skip', version);
   },
   close: () => {
     ipcRenderer.send('update-close');

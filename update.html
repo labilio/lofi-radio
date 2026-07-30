@@ -42,7 +42,7 @@
                     <path d="M14 4h6v6M10 14 20 4M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>
                 </svg>
             </button>
-            <button class="btn btn-quiet" id="skipBtn" type="button">不再提醒</button>
+            <button class="btn btn-quiet" id="skipBtn" type="button">跳过此版本</button>
         </div>
         </main>
     </div>
@@ -65,7 +65,7 @@
         });
 
         document.getElementById('skipBtn').addEventListener('click', () => {
-            window.updateAPI?.skip();
+            window.updateAPI?.skip(latestVersion);
         });
 
         document.getElementById('closeBtn').addEventListener('click', () => {

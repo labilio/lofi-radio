@@ -58,6 +58,7 @@
       "playback-controller.js",
       "playback-presentation.js",
       "preload.js",
+      "window-shortcut-prevention.js",
       "renderer.js",
       "settings.css",
       "settings.html",

@@ -96,7 +96,16 @@ async function inspectPage() {
 
             let interaction;
             const shouldRunInteractions = ${JSON.stringify(shouldRunInteractions)};
-            if (shouldRunInteractions && location.pathname.endsWith('/settings.html')) {
+            if (shouldRunInteractions && location.pathname.endsWith('/update.html')) {
+                let skippedVersion = null;
+                window.updateAPI = {
+                    skip: version => {
+                        skippedVersion = version;
+                    }
+                };
+                document.getElementById('skipBtn').click();
+                interaction = { skippedVersion };
+            } else if (shouldRunInteractions && location.pathname.endsWith('/settings.html')) {
                 const saved = {};
                 let resolveLaunchAtStartup;
                 window.settingsAPI = {

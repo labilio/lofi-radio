@@ -40,12 +40,25 @@ async function inspectPreload() {
       window.lofiWidget.onShowTodayFocusChanged(resolve);
     })
   `);
+  const preventedShortcutPromise = window.webContents.executeJavaScript(`
+    new Promise(resolve => {
+      window.settingsAPI.onPreventedWindowShortcutInput(resolve);
+    })
+  `);
   await wait();
   window.webContents.send('show-today-focus-changed', true);
+  window.webContents.send('prevented-window-shortcut-input', {
+    key: 'r',
+    ctrlKey: true,
+    altKey: false,
+    shiftKey: false,
+    metaKey: false
+  });
   const changed = await changedPromise;
+  const preventedShortcutInput = await preventedShortcutPromise;
 
   window.destroy();
-  return { ...values, changed };
+  return { ...values, changed, preventedShortcutInput };
 }
 
 app.whenReady()

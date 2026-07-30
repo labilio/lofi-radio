@@ -82,6 +82,13 @@ test('preload exposes the Today Focus preference to settings and widget windows'
   assert.equal(result.saved, false);
   assert.equal(result.settingsRead, false);
   assert.equal(result.changed, true);
+  assert.deepEqual(result.preventedShortcutInput, {
+    key: 'r',
+    ctrlKey: true,
+    altKey: false,
+    shiftKey: false,
+    metaKey: false
+  });
 });
 
 test('preload omits batch station health while preserving normal playback APIs', async () => {
@@ -94,6 +101,7 @@ test('preload omits batch station health while preserving normal playback APIs',
     healthUpdate: 'undefined',
     getStations: 'function',
     changeStation: 'function',
-    playbackUpdate: 'function'
+    playbackUpdate: 'function',
+    getSubtitleConfig: 'function'
   });
 });

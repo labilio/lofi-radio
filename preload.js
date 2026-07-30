@@ -1,5 +1,14 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
+function getSubtitleConfig() {
+  return new Promise((resolve) => {
+    ipcRenderer.once('subtitle-config-data', (_event, config) => {
+      resolve(config);
+    });
+    ipcRenderer.send('get-subtitle-config');
+  });
+}
+
 contextBridge.exposeInMainWorld('lofiWidget', {
   togglePlayPause: () => {
     ipcRenderer.send('toggle-play-pause');
@@ -47,6 +56,8 @@ contextBridge.exposeInMainWorld('lofiWidget', {
     ipcRenderer.on('subtitle-changed', (event, config) => callback(config));
   },
 
+  getSubtitleConfig,
+
   getShowTodayFocus: () => ipcRenderer.invoke('get-show-today-focus'),
 
   onShowTodayFocusChanged: (callback) => {
@@ -87,6 +98,10 @@ contextBridge.exposeInMainWorld('settingsAPI', {
     });
   },
 
+  onPreventedWindowShortcutInput: (callback) => {
+    ipcRenderer.on('prevented-window-shortcut-input', (_event, input) => callback(input));
+  },
+
   closeWindow: () => {
     ipcRenderer.send('close-settings-window');
   },
@@ -99,14 +114,7 @@ contextBridge.exposeInMainWorld('settingsAPI', {
 
   setLaunchAtStartup: (enabled) => ipcRenderer.invoke('set-launch-at-startup', enabled),
 
-  getSubtitleConfig: () => {
-    ipcRenderer.send('get-subtitle-config');
-    return new Promise((resolve) => {
-      ipcRenderer.once('subtitle-config-data', (event, config) => {
-        resolve(config);
-      });
-    });
-  },
+  getSubtitleConfig,
 
   setSubtitleConfig: (config) => {
     ipcRenderer.send('set-subtitle-config', config);

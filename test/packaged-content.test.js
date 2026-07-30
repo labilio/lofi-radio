@@ -13,6 +13,14 @@ const asarPath = path.join(
   'app.asar'
 );
 
+test('package manifest includes the window shortcut prevention runtime module', () => {
+  const packageJson = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
+  );
+
+  assert.equal(packageJson.build.files.includes('window-shortcut-prevention.js'), true);
+});
+
 test('packaged app contains runtime files without local development artifacts', {
   skip: process.env.RUN_PACKAGED_CONTENT_AUDIT !== '1'
 }, () => {

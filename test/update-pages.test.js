@@ -43,6 +43,11 @@ for (const scenario of scenarios) {
         for (const expectedCopy of scenario.copy) {
             assert.match(result.bodyText, expectedCopy);
         }
+        if (scenario.page === 'update.html') {
+            assert.match(result.bodyText, /跳过此版本/);
+            assert.doesNotMatch(result.bodyText, /不再提醒/);
+            assert.equal(result.interaction.skippedVersion, '1.4.0');
+        }
         for (const excludedCopy of scenario.excludedCopy || []) {
             assert.doesNotMatch(result.bodyText, excludedCopy);
         }

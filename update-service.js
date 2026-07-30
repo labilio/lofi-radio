@@ -38,6 +38,22 @@ function compareVersions(left, right) {
     return 0;
 }
 
+function shouldSkipUpdateReminder({
+    silent,
+    latestVersion,
+    skippedUpdateVersion
+}) {
+    if (!silent || typeof skippedUpdateVersion !== 'string') {
+        return false;
+    }
+
+    try {
+        return normalizeVersion(latestVersion) === normalizeVersion(skippedUpdateVersion);
+    } catch {
+        return false;
+    }
+}
+
 function reasonForStatus(status) {
     if (status === 403 || status === 429) return 'rate-limited';
     if (status >= 500) return 'service-unavailable';
@@ -200,5 +216,7 @@ async function checkLatestRelease({
 
 module.exports = {
     checkLatestRelease,
-    compareVersions
+    compareVersions,
+    normalizeVersion,
+    shouldSkipUpdateReminder
 };

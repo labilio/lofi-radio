@@ -3,7 +3,8 @@ const assert = require('node:assert/strict');
 
 const {
     checkLatestRelease,
-    compareVersions
+    compareVersions,
+    shouldSkipUpdateReminder
 } = require('../update-service');
 
 function response({
@@ -27,6 +28,29 @@ test('numeric version comparison handles double-digit minor versions', () => {
     assert.equal(compareVersions('1.10.0', '1.9.0'), 1);
     assert.equal(compareVersions('1.3.0', '1.3.0'), 0);
     assert.equal(compareVersions('1.2.9', '1.3.0'), -1);
+});
+
+test('silent reminders are skipped only for the exact version the user chose', () => {
+    assert.equal(shouldSkipUpdateReminder({
+        silent: true,
+        latestVersion: '1.4.0',
+        skippedUpdateVersion: '1.4.0'
+    }), true);
+    assert.equal(shouldSkipUpdateReminder({
+        silent: true,
+        latestVersion: '1.5.0',
+        skippedUpdateVersion: '1.4.0'
+    }), false);
+    assert.equal(shouldSkipUpdateReminder({
+        silent: false,
+        latestVersion: '1.4.0',
+        skippedUpdateVersion: '1.4.0'
+    }), false);
+    assert.equal(shouldSkipUpdateReminder({
+        silent: true,
+        latestVersion: '1.4.0',
+        skippedUpdateVersion: true
+    }), false);
 });
 
 test('falls back to the GitHub releases redirect when the API is rate limited', async () => {

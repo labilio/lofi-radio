@@ -1,7 +1,11 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { checkLatestRelease } = require('./update-service');
+const {
+  checkLatestRelease,
+  normalizeVersion,
+  shouldSkipUpdateReminder
+} = require('./update-service');
 const {
   getLaunchAtStartupStatus,
   initializeLaunchAtStartup,
@@ -11,6 +15,9 @@ const { fitSettingsWindow, showWindowWhenReady } = require('./subpage-window');
 const { PlaybackController } = require('./playback-controller');
 const { createAudioWindowAdapter } = require('./audio-window-adapters');
 const { createAudioWindowWebPreferences } = require('./audio-window-config');
+const {
+  installWindowShortcutPrevention
+} = require('./window-shortcut-prevention');
 
 const configPath = path.join(app.getPath('userData'), 'config.json');
 
@@ -70,7 +77,7 @@ let playbackStatus = {
   retryCount: 0
 };
 let isMainWindowVisible = true;
-let skipUpdateReminder = false;
+let skippedUpdateVersion = null;
 let shortcuts = {
   playPause: 'Alt+Q',
   toggleWindow: 'Alt+W'
@@ -166,8 +173,8 @@ function loadConfig() {
       if (data.shortcuts) {
         shortcuts = { ...shortcuts, ...data.shortcuts };
       }
-      if (data.skipUpdateReminder !== undefined) {
-        skipUpdateReminder = data.skipUpdateReminder;
+      if (typeof data.skippedUpdateVersion === 'string') {
+        skippedUpdateVersion = data.skippedUpdateVersion;
       }
       if (data.volume !== undefined) {
         currentVolume = data.volume;
@@ -189,7 +196,7 @@ function loadConfig() {
   } catch (e) {
     console.error('Failed to load config:', e);
   }
-  return { lastStationIndex: 0, shortcuts, skipUpdateReminder: false };
+  return { lastStationIndex: 0, shortcuts, skippedUpdateVersion: null };
 }
 
 function getIconPath() {
@@ -284,10 +291,12 @@ function createWindow() {
       resizable: false,
       minimizable: false,
       maximizable: false,
+      fullscreenable: false,
       closable: true,
       hasShadow: false,
       roundedCorners: true
     });
+    installWindowShortcutPrevention(mainWindow);
 
     console.log('Widget window created successfully');
   } catch (e) {
@@ -499,6 +508,7 @@ function createAudioWindow() {
       webPreferences: createAudioWindowWebPreferences(__dirname),
       skipTaskbar: true
     });
+    installWindowShortcutPrevention(audioWindow);
 
     initializePlaybackController();
     loadStations();
@@ -536,6 +546,15 @@ function createSettingsWindow() {
     frame: false,
     title: '设置 - Lofi Radio Player'
   });
+  installWindowShortcutPrevention(settingsWindow, input => {
+    settingsWindow.webContents.send('prevented-window-shortcut-input', {
+      key: String(input.key || ''),
+      ctrlKey: Boolean(input.control),
+      altKey: Boolean(input.alt),
+      shiftKey: Boolean(input.shift),
+      metaKey: Boolean(input.meta)
+    });
+  });
 
   showWindowWhenReady(settingsWindow);
   settingsWindow.loadFile('settings.html');
@@ -572,6 +591,7 @@ function createHistoryWindow() {
     frame: false,
     title: '专注历史 - Lofi Radio Player'
   });
+  installWindowShortcutPrevention(historyWindow);
 
   showWindowWhenReady(historyWindow);
   historyWindow.loadFile('history.html');
@@ -629,11 +649,6 @@ function playStation(index) {
 let updateWindow = null;
 
 async function checkForUpdates(silent = false) {
-  if (silent && skipUpdateReminder) {
-    console.log('Update reminder skipped by user preference');
-    return;
-  }
-
   const currentVersion = app.getVersion();
   console.log(`Current version: ${currentVersion}`);
 
@@ -651,6 +666,14 @@ async function checkForUpdates(silent = false) {
 
   if (result.status === 'update-available') {
     console.log(`Latest version: ${result.latestVersion}`);
+    if (shouldSkipUpdateReminder({
+      silent,
+      latestVersion: result.latestVersion,
+      skippedUpdateVersion
+    })) {
+      console.log(`Update reminder skipped for version ${result.latestVersion}`);
+      return;
+    }
     showUpdateWindow(
       result.currentVersion,
       result.latestVersion,
@@ -691,6 +714,7 @@ function showUpdateErrorWindow(result) {
     frame: false,
     title: '检查更新'
   });
+  installWindowShortcutPrevention(updateWindow);
 
   updateWindow.loadFile('update-error.html', {
     query: {
@@ -728,6 +752,7 @@ function showUpdateWindow(currentVersion, latestVersion, releaseUrl) {
     frame: false,
     title: '发现新版本'
   });
+  installWindowShortcutPrevention(updateWindow);
 
   updateWindow.loadFile('update.html', {
     query: {
@@ -767,6 +792,7 @@ function showLatestWindow(currentVersion) {
     frame: false,
     title: '已是最新版本'
   });
+  installWindowShortcutPrevention(updateWindow);
 
   updateWindow.loadFile('update-latest.html', {
     query: {
@@ -810,9 +836,13 @@ ipcMain.on('update-retry', () => {
   }
 });
 
-ipcMain.on('update-skip', () => {
-  skipUpdateReminder = true;
-  saveConfig({ skipUpdateReminder: true });
+ipcMain.on('update-skip', (event, version) => {
+  try {
+    skippedUpdateVersion = normalizeVersion(version);
+    saveConfig({ skippedUpdateVersion });
+  } catch (error) {
+    console.warn('Ignored invalid skipped update version:', error.message);
+  }
   if (updateWindow && !updateWindow.isDestroyed()) {
     updateWindow.close();
   }

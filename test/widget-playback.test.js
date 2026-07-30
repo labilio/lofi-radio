@@ -35,6 +35,24 @@ function inspectWidget() {
   });
 }
 
+test('widget restores the persisted greeting mode when it starts', async () => {
+  const result = await inspectWidget();
+  const greetings = [
+    'Hello, night owl',
+    'Rise and shine',
+    'Morning, sunshine',
+    'Enjoy the midday calm',
+    'A peaceful afternoon',
+    'What a beautiful evening',
+    'Good evening, dreamer'
+  ];
+
+  assert.ok(
+    greetings.includes(result.initial.subtitle),
+    `expected a persisted greeting, received "${result.initial.subtitle}"`
+  );
+});
+
 test('widget reflects real playback state without changing its compact layout', async () => {
   const result = await inspectWidget();
 

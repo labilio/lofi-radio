@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('lofiWidget', {
   onStationsList: (callback) => callbacks.stations.push(callback),
   onStationChanged: (callback) => callbacks.station.push(callback),
   onSubtitleChanged: (callback) => callbacks.subtitle.push(callback),
+  getSubtitleConfig: async () => ({ mode: 'greeting', customText: '' }),
   getShowTodayFocus: async () => true,
   onShowTodayFocusChanged: (callback) => callbacks.todayFocus.push(callback),
   onVolumeChange: (callback) => callbacks.volume.push(callback)

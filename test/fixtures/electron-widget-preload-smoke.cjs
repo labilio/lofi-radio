@@ -27,7 +27,8 @@ async function run() {
     healthUpdate: typeof window.lofiWidget?.onStationHealthCheckUpdate,
     getStations: typeof window.lofiWidget?.getStations,
     changeStation: typeof window.lofiWidget?.changeStation,
-    playbackUpdate: typeof window.lofiWidget?.onPlaybackStatusChange
+    playbackUpdate: typeof window.lofiWidget?.onPlaybackStatusChange,
+    getSubtitleConfig: typeof window.lofiWidget?.getSubtitleConfig
   })`);
   window.destroy();
   return { preloadErrors, api };

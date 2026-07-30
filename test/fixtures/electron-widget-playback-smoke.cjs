@@ -69,6 +69,7 @@ async function run() {
 
   await window.loadFile(path.join(projectRoot, 'index.html'));
   await wait(250);
+  const initial = await readState(window);
 
   const stations = [
     {
@@ -163,6 +164,7 @@ async function run() {
 
   window.destroy();
   return {
+    initial,
     connecting,
     playing,
     todayFocusHidden,

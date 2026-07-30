@@ -198,6 +198,14 @@ class LofiWidget {
                 });
             }
 
+            if (window.lofiWidget.getSubtitleConfig) {
+                window.lofiWidget.getSubtitleConfig()
+                    .then((config) => this.updateSubtitle(config))
+                    .catch((error) => {
+                        console.error('Failed to load subtitle configuration:', error);
+                    });
+            }
+
             if (window.lofiWidget.getShowTodayFocus) {
                 window.lofiWidget.getShowTodayFocus()
                     .then((enabled) => this.updateShowTodayFocus(enabled))

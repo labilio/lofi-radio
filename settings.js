@@ -124,6 +124,14 @@ class SettingsManager {
             }
         });
 
+        if (window.settingsAPI && window.settingsAPI.onPreventedWindowShortcutInput) {
+            window.settingsAPI.onPreventedWindowShortcutInput((input) => {
+                if (this.isRecording) {
+                    this.handleKeyPress(input);
+                }
+            });
+        }
+
         this.saveBtn.addEventListener('click', () => this.saveSettings());
         this.resetBtn.addEventListener('click', () => this.resetSettings());
 
