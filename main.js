@@ -16,6 +16,9 @@ const { PlaybackController } = require('./playback-controller');
 const { createAudioWindowAdapter } = require('./audio-window-adapters');
 const { createAudioWindowWebPreferences } = require('./audio-window-config');
 const {
+  startAudioOutputMonitoring
+} = require('./audio-output-monitor');
+const {
   installWindowShortcutPrevention
 } = require('./window-shortcut-prevention');
 
@@ -40,9 +43,6 @@ if (!gotTheLock) {
       }
       mainWindow.setAlwaysOnTop(true);
       mainWindow.focus();
-      setTimeout(() => {
-        mainWindow.setAlwaysOnTop(false);
-      }, 3000);
     }
   });
 }
@@ -69,6 +69,7 @@ let isPlaying = false;
 let currentVolume = 0.3;
 let playbackController = null;
 let activePlaybackAdapter = null;
+let disposeAudioOutputMonitoring = () => {};
 let playbackStatus = {
   sessionId: 0,
   stationIndex: -1,
@@ -979,6 +980,12 @@ app.whenReady().then(() => {
     launchAtStartup = Boolean(loadConfig().launchAtStartup);
   }
   createAudioWindow();
+  disposeAudioOutputMonitoring = startAudioOutputMonitoring({
+    ipcMain,
+    getAudioWindow: () => audioWindow,
+    getPlaybackState: () => playbackStatus.state,
+    getPlaybackController: () => playbackController
+  });
   createWindow();
   createTray();
   registerGlobalShortcut();
@@ -1018,6 +1025,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('will-quit', () => {
+  disposeAudioOutputMonitoring();
   playbackController?.destroy();
   globalShortcut.unregisterAll();
 });

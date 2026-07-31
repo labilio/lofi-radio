@@ -1,4 +1,4 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 let createAudioWindowWebPreferences;
 try {
@@ -12,6 +12,11 @@ const projectRoot = path.resolve(__dirname, '..', '..');
 
 async function run() {
   const preloadErrors = [];
+  let resolveOutputSnapshot;
+  const outputSnapshotPromise = new Promise((resolve, reject) => {
+    resolveOutputSnapshot = resolve;
+    setTimeout(() => reject(new Error('Timed out waiting for audio output snapshot')), 5000);
+  });
   const window = new BrowserWindow({
     width: 1,
     height: 1,
@@ -25,17 +30,26 @@ async function run() {
   window.webContents.on('preload-error', (_event, preloadPath, error) => {
     preloadErrors.push({ preloadPath, message: error.message });
   });
+  ipcMain.on('audio-output-snapshot', (event, snapshot) => {
+    if (event.sender === window.webContents) {
+      resolveOutputSnapshot(snapshot);
+    }
+  });
 
   await window.loadFile(path.join(projectRoot, 'audio.html'));
-  const runtime = await window.webContents.executeJavaScript(`
+  const pageState = await window.webContents.executeJavaScript(`
     ({
-      bridge: typeof window.audioPlayer,
-      hls: typeof window.Hls,
-      runtime: typeof window.LofiAudioRuntime
+      runtime: {
+        bridge: typeof window.audioPlayer,
+        hls: typeof window.Hls,
+        runtime: typeof window.LofiAudioRuntime
+      },
+      visibilityState: document.visibilityState
     })
   `);
+  const outputSnapshot = await outputSnapshotPromise;
   window.destroy();
-  return { preloadErrors, runtime };
+  return { preloadErrors, ...pageState, outputSnapshot };
 }
 
 if (createAudioWindowWebPreferences) app.whenReady()

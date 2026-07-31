@@ -24,6 +24,21 @@ test('playing and paused states restore the configured subtitle', () => {
   assert.equal(getPlaybackPresentation({ state: 'paused' }).isPlaying, false);
 });
 
+test('audio output changes explain why playback was paused', () => {
+  assert.deepEqual(
+    getPlaybackPresentation({
+      state: 'paused',
+      reason: 'audio-output-changed'
+    }),
+    {
+      subtitle: '音频设备已变化 · 已暂停',
+      isPlaying: false,
+      isError: false,
+      retryable: false
+    }
+  );
+});
+
 test('error state is retryable and uses the compact failure message', () => {
   assert.deepEqual(getPlaybackPresentation({ state: 'error' }), {
     subtitle: '连接失败 · 点击唱片重试',

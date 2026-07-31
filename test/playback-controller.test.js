@@ -194,6 +194,40 @@ test('pausing mutes the live source and only reports playing again after resume'
   assert.equal(lastState(harness).state, 'playing');
 });
 
+test('audio output loss uses controlled mute and resumes without the historical deadlock', () => {
+  const harness = createHarness();
+
+  harness.controller.load({ name: 'Direct', type: 'mp3', url: 'https://example.test/live' }, 0);
+  harness.adapters[0].emit({ state: 'playing' });
+  harness.controller.setPaused(true, 'audio-output-changed');
+
+  assert.equal(harness.adapters[0].muted, true);
+  assert.equal(lastState(harness).state, 'paused');
+  assert.equal(lastState(harness).reason, 'audio-output-changed');
+
+  harness.controller.setPaused(false);
+
+  assert.equal(harness.adapters[0].muted, false);
+  assert.equal(lastState(harness).state, 'playing');
+  assert.equal(lastState(harness).reason, null);
+});
+
+test('a real media pause during output loss rebuilds the source when the user resumes', () => {
+  const harness = createHarness();
+
+  harness.controller.load({ name: 'Direct', type: 'mp3', url: 'https://example.test/live' }, 0);
+  harness.adapters[0].emit({ state: 'playing' });
+  harness.controller.setPaused(true, 'audio-output-changed');
+  harness.adapters[0].emit({ state: 'paused' });
+
+  harness.controller.setPaused(false);
+
+  assert.equal(harness.adapters.length, 2);
+  assert.equal(harness.adapters[0].destroyed, true);
+  assert.equal(lastState(harness).state, 'reconnecting');
+  assert.equal(lastState(harness).reason, 'audio-output-changed');
+});
+
 test('pausing during connection suspends timeout retries until the user resumes', () => {
   const harness = createHarness();
 

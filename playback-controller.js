@@ -83,7 +83,7 @@ class PlaybackController {
     return true;
   }
 
-  setPaused(paused) {
+  setPaused(paused, reason = null) {
     const nextPaused = Boolean(paused);
     if (this.userPaused === nextPaused) return;
 
@@ -94,7 +94,7 @@ class PlaybackController {
 
     if (nextPaused) {
       this._clearTimers();
-      this._emit('paused', null);
+      this._emit('paused', reason);
       return;
     }
 
@@ -155,7 +155,7 @@ class PlaybackController {
       case 'paused':
         this.mediaState = 'paused';
         if (this.userPaused) {
-          this._emit('paused', null);
+          this._emit('paused', this.reason);
         } else {
           this._handleFailure(event.reason || 'media');
         }

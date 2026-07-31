@@ -15,8 +15,11 @@
 
   function getPlaybackPresentation(status = {}) {
     const state = status.state || 'idle';
+    const subtitle = state === 'paused' && status.reason === 'audio-output-changed'
+      ? '音频设备已变化 · 已暂停'
+      : subtitles[state] || null;
     return {
-      subtitle: subtitles[state] || null,
+      subtitle,
       isPlaying: state === 'playing',
       isError: state === 'error',
       retryable: state === 'error'

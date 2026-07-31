@@ -21,6 +21,14 @@ test('package manifest includes the window shortcut prevention runtime module', 
   assert.equal(packageJson.build.files.includes('window-shortcut-prevention.js'), true);
 });
 
+test('package manifest includes the audio output monitor runtime module', () => {
+  const packageJson = JSON.parse(
+    fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
+  );
+
+  assert.equal(packageJson.build.files.includes('audio-output-monitor.js'), true);
+});
+
 test('packaged app contains runtime files without local development artifacts', {
   skip: process.env.RUN_PACKAGED_CONTENT_AUDIT !== '1'
 }, () => {
