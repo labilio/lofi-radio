@@ -41,4 +41,12 @@ test('hidden audio window loads its local preload modules and browser bridge', a
     hls: 'function',
     runtime: 'object'
   });
+  assert.equal(result.visibilityState, 'visible');
+  assert.equal(typeof result.outputSnapshot.contextId, 'string');
+  assert.ok(result.outputSnapshot.contextId.length > 0);
+  assert.deepEqual(
+    Object.keys(result.outputSnapshot.defaultOutput).sort(),
+    ['groupId', 'label']
+  );
+  assert.equal(Array.isArray(result.outputSnapshot.outputDeviceIds), true);
 });

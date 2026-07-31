@@ -46,6 +46,7 @@
       "icon.png",
       "audio.html",
       "audio-preload.js",
+      "audio-output-monitor.js",
       "audio-runtime.js",
       "audio-window-adapters.js",
       "audio-window-config.js",
