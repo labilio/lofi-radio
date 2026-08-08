@@ -1,8 +1,16 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('updateAPI', {
-  download: (url) => {
-    ipcRenderer.send('update-download', url);
+  download: () => {
+    ipcRenderer.send('update-download');
+  },
+  install: () => {
+    ipcRenderer.send('update-install');
+  },
+  onState: (callback) => {
+    const listener = (_event, state) => callback(state);
+    ipcRenderer.on('update-state', listener);
+    return () => ipcRenderer.removeListener('update-state', listener);
   },
   viewChanges: () => {
     ipcRenderer.send('update-view-changes');

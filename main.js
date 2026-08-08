@@ -1,11 +1,13 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const { autoUpdater } = require('electron-updater');
+const updateLogger = require('electron-log/main');
 const {
-  checkLatestRelease,
   normalizeVersion,
   shouldSkipUpdateReminder
 } = require('./update-service');
+const { createAutoUpdateService } = require('./auto-update-service');
 const {
   getLaunchAtStartupStatus,
   initializeLaunchAtStartup,
@@ -648,45 +650,66 @@ function playStation(index) {
 }
 
 let updateWindow = null;
+let activeUpdateCheckSilent = false;
+let lastAvailableUpdateVersion = null;
+const autoUpdateService = createAutoUpdateService({
+  updater: autoUpdater,
+  logger: updateLogger
+});
 
-async function checkForUpdates(silent = false) {
-  const currentVersion = app.getVersion();
-  console.log(`Current version: ${currentVersion}`);
-
-  let result;
-  try {
-    result = await checkLatestRelease({ currentVersion });
-  } catch (error) {
-    console.error('Unexpected update check failure:', error);
-    result = {
-      status: 'error',
-      reason: 'request-failed',
-      message: '暂时无法连接更新服务，请稍后重试。'
-    };
+function sendUpdateState(state) {
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    updateWindow.webContents.send('update-state', state);
   }
+}
 
-  if (result.status === 'update-available') {
-    console.log(`Latest version: ${result.latestVersion}`);
+function handleAutoUpdateState(state) {
+  if (state.status === 'available') {
+    lastAvailableUpdateVersion = state.version;
     if (shouldSkipUpdateReminder({
-      silent,
-      latestVersion: result.latestVersion,
+      silent: activeUpdateCheckSilent,
+      latestVersion: state.version,
       skippedUpdateVersion
     })) {
-      console.log(`Update reminder skipped for version ${result.latestVersion}`);
+      console.log(`Update reminder skipped for version ${state.version}`);
       return;
     }
-    showUpdateWindow(
-      result.currentVersion,
-      result.latestVersion,
-      result.releaseUrl
-    );
-  } else if (result.status === 'up-to-date') {
-    console.log(`Latest version: ${result.latestVersion}`);
-    if (!silent) showLatestWindow(result.currentVersion);
-  } else {
-    console.warn(`Check for updates unavailable: ${result.reason}`);
-    if (!silent) showUpdateErrorWindow(result);
+    showUpdateWindow(app.getVersion(), state.version);
+    return;
   }
+
+  if (state.status === 'up-to-date') {
+    if (!activeUpdateCheckSilent) showLatestWindow(app.getVersion());
+    return;
+  }
+
+  if (['downloading', 'downloaded'].includes(state.status)) {
+    if (!updateWindow || updateWindow.isDestroyed()) {
+      showUpdateWindow(app.getVersion(), state.version || lastAvailableUpdateVersion, state);
+    } else {
+      sendUpdateState(state);
+    }
+    return;
+  }
+
+  if (state.status === 'error') {
+    if (updateWindow && !updateWindow.isDestroyed() && lastAvailableUpdateVersion) {
+      sendUpdateState(state);
+    } else if (!activeUpdateCheckSilent) {
+      showUpdateErrorWindow({
+        reason: 'request-failed',
+        message: state.message
+      });
+    }
+  }
+}
+
+autoUpdateService.on('state', handleAutoUpdateState);
+
+async function checkForUpdates(silent = false) {
+  activeUpdateCheckSilent = silent;
+  console.log(`Checking for updates from version ${app.getVersion()}`);
+  await autoUpdateService.checkForUpdates();
 }
 
 function showUpdateErrorWindow(result) {
@@ -728,9 +751,10 @@ function showUpdateErrorWindow(result) {
   });
 }
 
-function showUpdateWindow(currentVersion, latestVersion, releaseUrl) {
+function showUpdateWindow(currentVersion, latestVersion, initialState = null) {
   if (updateWindow && !updateWindow.isDestroyed()) {
     updateWindow.focus();
+    if (initialState) sendUpdateState(initialState);
     return;
   }
 
@@ -758,17 +782,22 @@ function showUpdateWindow(currentVersion, latestVersion, releaseUrl) {
   updateWindow.loadFile('update.html', {
     query: {
       current: currentVersion,
-      latest: latestVersion,
-      url: releaseUrl
+      latest: latestVersion
     }
   });
+
+  if (initialState) {
+    updateWindow.webContents.once('did-finish-load', () => {
+      sendUpdateState(initialState);
+    });
+  }
 
   updateWindow.on('closed', () => {
     updateWindow = null;
   });
 }
 
-function showLatestWindow(currentVersion) {
+function showLatestWindow(currentVersion, updated = false) {
   if (updateWindow && !updateWindow.isDestroyed()) {
     updateWindow.focus();
     return;
@@ -791,13 +820,14 @@ function showLatestWindow(currentVersion) {
     maximizable: false,
     fullscreenable: false,
     frame: false,
-    title: '已是最新版本'
+    title: updated ? '升级完成' : '已是最新版本'
   });
   installWindowShortcutPrevention(updateWindow);
 
   updateWindow.loadFile('update-latest.html', {
     query: {
-      current: currentVersion
+      current: currentVersion,
+      updated: updated ? '1' : '0'
     }
   });
 
@@ -806,10 +836,15 @@ function showLatestWindow(currentVersion) {
   });
 }
 
-ipcMain.on('update-download', (event, url) => {
-  shell.openExternal(url);
-  if (updateWindow && !updateWindow.isDestroyed()) {
-    updateWindow.close();
+ipcMain.on('update-download', () => {
+  void autoUpdateService.downloadUpdate().catch(error => {
+    console.error('Failed to download update:', error);
+  });
+});
+
+ipcMain.on('update-install', () => {
+  if (!autoUpdateService.quitAndInstall()) {
+    console.warn('Ignored update install request before download completed');
   }
 });
 
@@ -989,6 +1024,12 @@ app.whenReady().then(() => {
   createWindow();
   createTray();
   registerGlobalShortcut();
+
+  if (process.argv.includes('--updated')) {
+    setTimeout(() => {
+      showLatestWindow(app.getVersion(), true);
+    }, 400);
+  }
 
   setTimeout(() => {
     if (mainWindow && !mainWindow.isDestroyed()) {

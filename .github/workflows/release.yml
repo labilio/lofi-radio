@@ -1,0 +1,264 @@
+name: Build desktop release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-windows:
+    name: Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build Windows updater package
+        run: npx electron-builder --win --x64 --publish=never
+
+      - name: Validate packaged application
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $package = Get-Content package.json -Raw | ConvertFrom-Json
+          $expectedVersion = $package.version
+
+          if ($env:GITHUB_REF -like 'refs/tags/*' -and $env:GITHUB_REF_NAME -ne "v$expectedVersion") {
+            throw "Tag $env:GITHUB_REF_NAME does not match package version v$expectedVersion"
+          }
+
+          $exe = Resolve-Path 'dist_green/win-unpacked/Lofi Radio Player.exe'
+          $bytes = [System.IO.File]::ReadAllBytes($exe)
+          $peOffset = [BitConverter]::ToInt32($bytes, 0x3c)
+          $machine = [BitConverter]::ToUInt16($bytes, $peOffset + 4)
+          if ($machine -ne 0x8664) {
+            throw "Expected an x64 PE executable, got 0x$($machine.ToString('X4'))"
+          }
+
+          $env:RUN_PACKAGED_CONTENT_AUDIT = '1'
+          node --test test/packaged-content.test.js
+          $env:RUN_PACKAGED_SUBPAGE_TESTS = '1'
+          node --test test/packaged-subpages.test.js
+
+          $userDataDir = Join-Path $env:RUNNER_TEMP 'lofi-radio-launch-smoke'
+          $process = Start-Process -FilePath $exe -ArgumentList @('--user-data-dir', $userDataDir) -PassThru
+          Start-Sleep -Seconds 10
+          if ($process.HasExited) {
+            throw "Packaged app exited during launch smoke test with code $($process.ExitCode)"
+          }
+          Stop-Process -Id $process.Id -Force
+
+      - name: Validate and stage Windows updater assets
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $stage = New-Item -ItemType Directory -Force 'release-stage/windows-x64'
+          $metadataPath = Resolve-Path 'dist_green/latest.yml'
+          $metadata = Get-Content $metadataPath -Raw
+          $pathMatch = [regex]::Match($metadata, '(?m)^path:\s*(.+)$')
+          if (-not $pathMatch.Success) {
+            throw 'latest.yml does not contain an updater asset path'
+          }
+
+          $assetName = $pathMatch.Groups[1].Value.Trim()
+          if ([System.IO.Path]::GetFileName($assetName) -ne $assetName) {
+            throw "Unsafe updater asset name in latest.yml: $assetName"
+          }
+
+          $installers = @(Get-ChildItem 'dist_green' -File -Filter '*.exe' | Where-Object Name -Like '*Setup*')
+          if ($installers.Count -ne 1) {
+            throw "Expected exactly one NSIS installer, found $($installers.Count)"
+          }
+          $installer = $installers[0]
+          $blockmapPath = "$($installer.FullName).blockmap"
+          if (-not (Test-Path -LiteralPath $blockmapPath)) {
+            throw "Missing updater blockmap: $blockmapPath"
+          }
+
+          Copy-Item -LiteralPath $metadataPath -Destination (Join-Path $stage 'latest.yml')
+          Copy-Item -LiteralPath $installer.FullName -Destination (Join-Path $stage $assetName)
+          Copy-Item -LiteralPath $blockmapPath -Destination (Join-Path $stage "$assetName.blockmap")
+
+          $stagedInstaller = Join-Path $stage $assetName
+          $stagedBlockmap = "$stagedInstaller.blockmap"
+          if ((Get-Item $stagedInstaller).Length -le 0 -or (Get-Item $stagedBlockmap).Length -le 0) {
+            throw 'Staged updater assets are empty'
+          }
+
+          Get-FileHash -Algorithm SHA256 -Path @($metadataPath, $stagedInstaller, $stagedBlockmap) |
+            ForEach-Object { "$($_.Hash.ToLower())  $([System.IO.Path]::GetFileName($_.Path))" } |
+            Set-Content -Encoding utf8 (Join-Path $stage 'SHA256SUMS-windows-x64.txt')
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: desktop-windows-x64
+          path: release-stage/windows-x64/
+          if-no-files-found: error
+          retention-days: 14
+
+  build-macos:
+    name: macOS ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-latest
+            arch: arm64
+            builder_flag: --arm64
+          - runner: macos-15-intel
+            arch: x64
+            builder_flag: --x64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 40
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies
+        run: npm audit --omit=dev
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build macOS packages
+        run: npx electron-builder --mac ${{ matrix.builder_flag }} --publish=never
+
+      - name: Validate and stage macOS packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          expected_arch='${{ matrix.arch }}'
+          app_path="$(find dist_green -maxdepth 2 -type d -name '*.app' -print -quit)"
+          dmg_path="$(find dist_green -maxdepth 1 -type f -name '*.dmg' -print -quit)"
+          zip_path="$(find dist_green -maxdepth 1 -type f -name '*.zip' -print -quit)"
+
+          test -n "$app_path"
+          test -n "$dmg_path"
+          test -n "$zip_path"
+          codesign --verify --deep --strict --verbose=2 "$app_path"
+          codesign -dv --verbose=4 "$app_path" 2>&1 | grep -q 'Signature=adhoc'
+
+          executable="$app_path/Contents/MacOS/Lofi Radio Player"
+          actual_arch="$(lipo -archs "$executable")"
+          case " $actual_arch " in
+            *" $expected_arch "*) ;;
+            *) echo "Expected $expected_arch executable, got $actual_arch" >&2; exit 1 ;;
+          esac
+
+          hdiutil verify "$dmg_path"
+          mount_dir="$(mktemp -d)"
+          smoke_dir="$(mktemp -d)"
+          cleanup() {
+            hdiutil detach "$mount_dir" -force >/dev/null 2>&1 || true
+            rm -rf "$mount_dir" "$smoke_dir"
+          }
+          trap cleanup EXIT
+          hdiutil attach "$dmg_path" -nobrowse -readonly -mountpoint "$mount_dir"
+          mounted_app="$(find "$mount_dir" -maxdepth 1 -type d -name '*.app' -print -quit)"
+          test -n "$mounted_app"
+          ditto "$mounted_app" "$smoke_dir/Lofi Radio Player.app"
+          xattr -cr "$smoke_dir/Lofi Radio Player.app"
+          "$smoke_dir/Lofi Radio Player.app/Contents/MacOS/Lofi Radio Player" \
+            --user-data-dir="$smoke_dir/user-data" >/tmp/lofi-radio-smoke.log 2>&1 &
+          app_pid=$!
+          sleep 10
+          kill -0 "$app_pid"
+          kill "$app_pid"
+          wait "$app_pid" || true
+
+          stage='release-stage/macos-${{ matrix.arch }}'
+          mkdir -p "$stage"
+          cp "$dmg_path" "$stage/Lofi-Radio-Player-${version}-mac-${{ matrix.arch }}.dmg"
+          cp "$zip_path" "$stage/Lofi-Radio-Player-${version}-mac-${{ matrix.arch }}.zip"
+          (
+            cd "$stage"
+            shasum -a 256 ./*.dmg ./*.zip > "SHA256SUMS-mac-${{ matrix.arch }}.txt"
+          )
+
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: desktop-macos-${{ matrix.arch }}
+          path: release-stage/macos-${{ matrix.arch }}/
+          if-no-files-found: error
+          retention-days: 14
+
+  publish-release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs:
+      - build-windows
+      - build-macos
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -d '' assets < <(find release-assets -maxdepth 1 -type f -print0)
+          test "${#assets[@]}" -gt 0
+          test -f release-assets/latest.yml
+          find release-assets -maxdepth 1 -type f -name '*.exe' -print -quit | grep -q .
+          find release-assets -maxdepth 1 -type f -name '*.exe.blockmap' -print -quit | grep -q .
+          find release-assets -maxdepth 1 -type f -name '*.dmg' -print -quit | grep -q .
+          find release-assets -maxdepth 1 -type f -name '*.zip' -print -quit | grep -q .
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" "${assets[@]}" --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
+              --verify-tag \
+              --generate-notes \
+              --title "Lofi Radio Player $GITHUB_REF_NAME"
+          fi

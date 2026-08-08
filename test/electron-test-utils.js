@@ -11,6 +11,7 @@ function inspectElectronPage(page, expectedTags = [], options = {}) {
         delete env.ELECTRON_RUN_AS_NODE;
         if (options.query) env.PAGE_QUERY = JSON.stringify(options.query);
         if (options.screenshotPath) env.SCREENSHOT_PATH = path.resolve(options.screenshotPath);
+        if (options.runInteractions === false) env.SKIP_PAGE_INTERACTIONS = '1';
 
         const targetPagePath = options.absolutePagePath
             ? path.resolve(options.absolutePagePath)

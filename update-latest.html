@@ -19,7 +19,7 @@
 
         <main class="update-shell">
             <section aria-labelledby="updateTitle">
-            <p class="message">你正在使用当前发布的最新版本。</p>
+            <p class="message" id="latestMessage">你正在使用当前发布的最新版本。</p>
             </section>
 
         <div class="version-rail is-current">
@@ -27,13 +27,13 @@
                 <span class="version-caption">当前版本</span>
                 <span class="version-value">v<span id="currentVersion"></span></span>
             </div>
-            <span class="current-badge">已是最新</span>
+            <span class="current-badge" id="currentBadge">已是最新</span>
         </div>
 
         <div class="actions">
             <button class="btn btn-primary" id="okBtn" type="button">知道了</button>
             <button class="btn btn-secondary" id="viewChangesBtn" type="button">
-                支持项目
+                <span id="secondaryActionText">支持项目</span>
                 <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                     <path d="M14 4h6v6M10 14 20 4M18 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h6"/>
                 </svg>
@@ -43,13 +43,28 @@
     </div>
 
     <script>
-        const currentVersion =
-            new URLSearchParams(window.location.search).get('current') || '—';
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentVersion = urlParams.get('current') || '—';
+        const updated = urlParams.get('updated') === '1';
 
         document.getElementById('currentVersion').textContent = currentVersion;
 
+        if (updated) {
+            document.title = '升级完成';
+            document.getElementById('updateTitle').textContent = '升级完成';
+            document.getElementById('latestMessage').textContent =
+                `Lofi Radio 已更新到 v${currentVersion}。`;
+            document.getElementById('currentBadge').textContent = '升级成功';
+            document.getElementById('okBtn').textContent = '开始使用';
+            document.getElementById('secondaryActionText').textContent = '查看更新内容';
+        }
+
         document.getElementById('viewChangesBtn').addEventListener('click', () => {
-            window.updateAPI?.viewRepository();
+            if (updated) {
+                window.updateAPI?.viewChanges();
+            } else {
+                window.updateAPI?.viewRepository();
+            }
         });
 
         document.getElementById('okBtn').addEventListener('click', () => {

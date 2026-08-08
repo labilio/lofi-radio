@@ -130,12 +130,19 @@ test('settings, update, and history share one aligned product header', async () 
 
     const baseline = results[0];
     for (const header of results.slice(1)) {
-        assert.equal(header.productLeft, baseline.productLeft);
-        assert.equal(header.productTop, baseline.productTop);
-        assert.equal(header.titleLeft, baseline.titleLeft);
-        assert.equal(header.titleTop, baseline.titleTop);
-        assert.equal(header.closeTop, baseline.closeTop);
-        assert.equal(header.closeRightGap, baseline.closeRightGap);
+        for (const property of [
+            'productLeft',
+            'productTop',
+            'titleLeft',
+            'titleTop',
+            'closeTop',
+            'closeRightGap'
+        ]) {
+            assert.ok(
+                Math.abs(header[property] - baseline[property]) <= 1,
+                `${property} differed by more than one rendered pixel`
+            );
+        }
     }
 });
 

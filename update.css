@@ -65,6 +65,88 @@ button {
     background: rgba(255, 255, 255, 0.026);
 }
 
+.status-panel[hidden] {
+    display: none;
+}
+
+.version-rail[hidden] {
+    display: none;
+}
+
+.status-panel.download-status {
+    display: grid;
+    grid-template-columns: 104px minmax(0, 1fr) auto;
+    gap: 10px;
+}
+
+.status-panel.download-status[hidden] {
+    display: none;
+}
+
+.download-status progress {
+    width: 104px;
+    height: 7px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.download-status #downloadStatusText {
+    min-width: 0;
+    justify-self: start;
+    color: #aeb8cb;
+    white-space: nowrap;
+}
+
+.download-status:not([data-status="downloading"]) #downloadStatusText {
+    grid-column: 1 / -1;
+}
+
+.download-metrics {
+    min-width: 92px;
+    display: block;
+    text-align: right;
+    font-family: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.download-metrics[hidden] {
+    display: none;
+}
+
+.download-amount {
+    color: #c9d1df;
+    font-size: 11px;
+    font-weight: 650;
+}
+
+.download-status progress::-webkit-progress-bar {
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.download-status progress::-webkit-progress-value {
+    border-radius: inherit;
+    background: var(--signal);
+}
+
+.btn:disabled {
+    cursor: default;
+    opacity: 0.62;
+}
+
+.close-btn:disabled {
+    cursor: default;
+    opacity: 0.48;
+}
+
+.btn[hidden] {
+    display: none;
+}
+
 .version-rail {
     display: grid;
     grid-template-columns: 1fr 30px 1fr;

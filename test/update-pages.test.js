@@ -14,9 +14,18 @@ const scenarios = [
     },
     {
         page: 'update-latest.html',
+        label: 'latest version',
         query: { current: '1.3.0' },
         copy: [/已是最新版本/, /v1\.3\.0/, /支持项目/],
         excludedCopy: [/查看发布页/, /查看更新内容/, /点个 Star/],
+        buttons: ['closeBtn', 'okBtn', 'viewChangesBtn']
+    },
+    {
+        page: 'update-latest.html',
+        label: 'completed update',
+        query: { current: '1.4.0', updated: '1' },
+        copy: [/升级完成/, /已更新到 v1\.4\.0/, /升级成功/, /查看更新内容/],
+        excludedCopy: [/已是最新版本/, /支持项目/],
         buttons: ['closeBtn', 'okBtn', 'viewChangesBtn']
     },
     {
@@ -28,7 +37,7 @@ const scenarios = [
 ];
 
 for (const scenario of scenarios) {
-    test(`${scenario.page} uses the shared compact update shell`, async () => {
+    test(`${scenario.label || scenario.page} uses the shared compact update shell`, async () => {
         const source = fs.readFileSync(path.join(projectRoot, scenario.page), 'utf8');
         const result = await inspectElectronPage(scenario.page, [], {
             query: scenario.query
@@ -36,17 +45,43 @@ for (const scenario of scenarios) {
 
         assert.match(source, /<link[^>]+href=["']update\.css["']/i);
         assert.doesNotMatch(source, /<style[\s>]/i);
-        assert.doesNotMatch(result.bodyText, /🎁|🚀/u);
-        assert.match(result.bodyText, /LOFI RADIO/);
+        assert.doesNotMatch(result.initialBodyText, /🎁|🚀/u);
+        assert.match(result.initialBodyText, /LOFI RADIO/);
         assert.equal(result.layout.stateKickerCount, 0);
         assert.equal(result.layout.productLabel, 'LOFI RADIO');
         for (const expectedCopy of scenario.copy) {
-            assert.match(result.bodyText, expectedCopy);
+            assert.match(result.initialBodyText, expectedCopy);
         }
         if (scenario.page === 'update.html') {
-            assert.match(result.bodyText, /跳过此版本/);
-            assert.doesNotMatch(result.bodyText, /不再提醒/);
+            assert.match(result.initialBodyText, /跳过此版本/);
+            assert.doesNotMatch(result.initialBodyText, /不再提醒/);
             assert.equal(result.interaction.skippedVersion, '1.4.0');
+            assert.equal(result.interaction.downloadCalls, 1);
+            assert.equal(result.interaction.installCalls, 1);
+            assert.match(result.interaction.downloadingText, /正在下载.*42%/);
+            assert.equal(result.interaction.progressValue, 42.4);
+            assert.equal(result.interaction.downloadAmountText, '40.7 MB / 96 MB');
+            assert.equal(result.interaction.downloadSpeedText, null);
+            assert.equal(result.interaction.downloadSpeedCount, 0);
+            assert.equal(result.interaction.downloadMetricsDisplay, 'block');
+            assert.equal(result.interaction.downloadMetricsTextAlign, 'right');
+            assert.ok(
+                result.interaction.downloadMetricsRightGap <= 14,
+                `download amount left ${result.interaction.downloadMetricsRightGap}px on the right`
+            );
+            assert.ok(
+                result.interaction.downloadStatusToMetricsGap >= 16,
+                `download amount was only ${result.interaction.downloadStatusToMetricsGap}px from the percentage`
+            );
+            assert.equal(result.interaction.downloadedButtonText, '重启并安装');
+            assert.equal(result.interaction.downloadedHasOverflow, false);
+            assert.doesNotMatch(result.interaction.downloadedBodyText, /跳过此版本/);
+            assert.ok(
+                result.interaction.downloadedActionsBottom <= result.layout.viewportHeight - 16,
+                `downloaded actions ended at ${result.interaction.downloadedActionsBottom}px`
+            );
+            assert.match(result.interaction.installingText, /接下来会显示安装进度/);
+            assert.equal(result.interaction.installingButtonText, '正在准备…');
         }
         for (const excludedCopy of scenario.excludedCopy || []) {
             assert.doesNotMatch(result.bodyText, excludedCopy);
@@ -67,7 +102,8 @@ for (const scenario of scenarios) {
 test('all update states form one compact content group', async () => {
     for (const scenario of scenarios) {
         const result = await inspectElectronPage(scenario.page, [], {
-            query: scenario.query
+            query: scenario.query,
+            runInteractions: false
         });
 
         assert.ok(

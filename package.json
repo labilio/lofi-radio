@@ -74,6 +74,7 @@
       "update-error.html",
       "update-latest.html",
       "update-preload.js",
+      "auto-update-service.js",
       "update-service.js",
       "webawesome-components.js",
       "widget.js",
@@ -85,11 +86,19 @@
     "win": {
       "icon": "icon.ico",
       "target": [
-        "dir"
+        "nsis"
       ]
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "labilio",
+        "repo": "lofi-radio"
+      }
+    ],
     "mac": {
       "icon": "icon.icns",
+      "identity": "-",
       "target": [
         "dir",
         "dmg",
@@ -120,8 +129,8 @@
       }
     },
     "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
+      "oneClick": true,
+      "allowToChangeInstallationDirectory": false,
       "installerIcon": "icon.ico",
       "uninstallerIcon": "icon.ico",
       "installerHeaderIcon": "icon.ico",
@@ -132,6 +141,8 @@
   },
   "dependencies": {
     "@awesome.me/webawesome": "^3.10.0",
+    "electron-log": "5.4.4",
+    "electron-updater": "6.8.9",
     "hls.js": "1.6.16"
   }
 }

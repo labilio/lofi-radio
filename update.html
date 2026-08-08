@@ -19,10 +19,10 @@
 
         <main class="update-shell">
             <section aria-labelledby="updateTitle">
-            <p class="message">新版本已经发布，可以前往 GitHub 下载。</p>
+            <p class="message" id="updateMessage">新版本已经发布，可以直接下载升级。</p>
             </section>
 
-        <div class="version-rail" aria-label="版本对比">
+        <div class="version-rail" id="versionRail" aria-label="版本对比">
             <div class="version-block">
                 <span class="version-caption">当前版本</span>
                 <span class="version-value">v<span id="currentVersion"></span></span>
@@ -34,8 +34,16 @@
             </div>
         </div>
 
+        <div class="status-panel download-status" id="downloadStatus" hidden>
+            <progress id="downloadProgress" max="100" value="0"></progress>
+            <span id="downloadStatusText">准备下载…</span>
+            <span class="download-metrics" id="downloadMetrics" hidden>
+                <span class="download-amount" id="downloadAmount"></span>
+            </span>
+        </div>
+
         <div class="actions">
-            <button class="btn btn-primary" id="downloadBtn" type="button">前往下载</button>
+            <button class="btn btn-primary" id="downloadBtn" type="button">立即升级</button>
             <button class="btn btn-secondary" id="viewChangesBtn" type="button">
                 查看更新内容
                 <svg class="external-link-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -51,14 +59,105 @@
         const urlParams = new URLSearchParams(window.location.search);
         const currentVersion = urlParams.get('current') || '—';
         const latestVersion = urlParams.get('latest') || '—';
-        const releaseUrl = urlParams.get('url');
+        let updateState = 'available';
+        let installTimer = null;
 
         document.getElementById('currentVersion').textContent = currentVersion;
         document.getElementById('latestVersion').textContent = latestVersion;
 
         document.getElementById('downloadBtn').addEventListener('click', () => {
-            window.updateAPI?.download(releaseUrl);
+            if (updateState === 'downloaded') {
+                applyUpdateState({ status: 'installing' });
+                installTimer = setTimeout(() => {
+                    window.updateAPI?.install();
+                }, 650);
+            } else {
+                window.updateAPI?.download();
+            }
         });
+
+        function formatMegabytes(bytes) {
+            const megabytes = Math.max(0, Number(bytes) || 0) / 1000 / 1000;
+            return megabytes.toFixed(1).replace(/\.0$/, '');
+        }
+
+        function applyUpdateState(state) {
+            const message = document.getElementById('updateMessage');
+            const versionRail = document.getElementById('versionRail');
+            const downloadStatus = document.getElementById('downloadStatus');
+            const progress = document.getElementById('downloadProgress');
+            const statusText = document.getElementById('downloadStatusText');
+            const downloadMetrics = document.getElementById('downloadMetrics');
+            const downloadAmount = document.getElementById('downloadAmount');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const viewChangesBtn = document.getElementById('viewChangesBtn');
+            const skipBtn = document.getElementById('skipBtn');
+            const closeBtn = document.getElementById('closeBtn');
+
+            updateState = state.status;
+            downloadStatus.dataset.status = state.status;
+            if (state.status === 'downloading') {
+                const percent = Math.max(0, Math.min(100, Number(state.percent) || 0));
+                const transferred = Math.max(0, Number(state.transferred) || 0);
+                const total = Math.max(0, Number(state.total) || 0);
+                versionRail.hidden = true;
+                downloadStatus.hidden = false;
+                progress.hidden = false;
+                progress.value = percent;
+                statusText.textContent = `正在下载 ${Math.round(percent)}%`;
+                if (total > 0) {
+                    downloadAmount.textContent = `${formatMegabytes(transferred)} MB / ${formatMegabytes(total)} MB`;
+                    downloadMetrics.hidden = false;
+                } else {
+                    downloadMetrics.hidden = true;
+                }
+                message.textContent = '正在下载更新，完成后即可安装。';
+                downloadBtn.textContent = '正在下载…';
+                downloadBtn.disabled = true;
+                viewChangesBtn.disabled = false;
+                skipBtn.disabled = true;
+                closeBtn.disabled = false;
+            } else if (state.status === 'downloaded') {
+                versionRail.hidden = true;
+                downloadStatus.hidden = false;
+                progress.hidden = true;
+                downloadMetrics.hidden = true;
+                statusText.textContent = '下载完成，重启后将自动安装';
+                message.textContent = '新版本已经准备好，可以立即完成升级。';
+                downloadBtn.textContent = '重启并安装';
+                downloadBtn.disabled = false;
+                viewChangesBtn.disabled = false;
+                skipBtn.hidden = true;
+                closeBtn.disabled = false;
+            } else if (state.status === 'installing') {
+                versionRail.hidden = true;
+                downloadStatus.hidden = false;
+                progress.hidden = true;
+                downloadMetrics.hidden = true;
+                statusText.textContent = '正在启动安装程序…';
+                message.textContent = '接下来会显示安装进度，完成后自动重新打开。';
+                downloadBtn.textContent = '正在准备…';
+                downloadBtn.disabled = true;
+                viewChangesBtn.disabled = true;
+                skipBtn.hidden = true;
+                closeBtn.disabled = true;
+            } else if (state.status === 'error') {
+                versionRail.hidden = true;
+                downloadStatus.hidden = false;
+                progress.hidden = true;
+                downloadMetrics.hidden = true;
+                statusText.textContent = '下载失败，请检查网络后重试';
+                message.textContent = state.message || '暂时无法下载新版本。';
+                downloadBtn.textContent = '重新下载';
+                downloadBtn.disabled = false;
+                viewChangesBtn.disabled = false;
+                skipBtn.disabled = false;
+                closeBtn.disabled = false;
+            }
+        }
+
+        window.applyUpdateState = applyUpdateState;
+        window.updateAPI?.onState(applyUpdateState);
 
         document.getElementById('viewChangesBtn').addEventListener('click', () => {
             window.updateAPI?.viewChanges();
