@@ -223,7 +223,7 @@ jobs:
           retention-days: 14
 
   publish-release:
-    name: Publish GitHub Release
+    name: Prepare draft GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
     needs:
       - build-windows
@@ -240,7 +240,7 @@ jobs:
           path: release-assets
           merge-multiple: true
 
-      - name: Publish release assets
+      - name: Prepare draft release assets
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
@@ -259,6 +259,7 @@ jobs:
           else
             gh release create "$GITHUB_REF_NAME" "${assets[@]}" \
               --verify-tag \
+              --draft \
               --generate-notes \
               --title "Lofi Radio Player $GITHUB_REF_NAME"
           fi

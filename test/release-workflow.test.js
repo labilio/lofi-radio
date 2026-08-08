@@ -63,7 +63,7 @@ test('macOS jobs build, verify, and launch native arm64 and Intel packages', () 
   assert.match(workflow, /mac-\$\{\{ matrix\.arch \}\}\.dmg/);
 });
 
-test('release job publishes all assets only for a pushed version tag', () => {
+test('release job prepares a draft with all assets only for a pushed version tag', () => {
   const workflow = readWorkflow();
 
   assert.match(workflow, /^\s{2}publish-release:\s*$/m);
@@ -71,5 +71,7 @@ test('release job publishes all assets only for a pushed version tag', () => {
   assert.match(workflow, /contents:\s*write/);
   assert.match(workflow, /gh release upload/);
   assert.match(workflow, /gh release create/);
+  assert.match(workflow, /--draft/);
+  assert.match(workflow, /--generate-notes/);
   assert.match(workflow, /merge-multiple:\s*true/);
 });
