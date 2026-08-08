@@ -36,6 +36,24 @@ const scenarios = [
     }
 ];
 
+test('manual delivery opens the trusted release page without starting an in-app download', async () => {
+    const result = await inspectElectronPage('update.html', [], {
+        query: {
+            current: '1.3.0',
+            latest: '1.4.0',
+            delivery: 'manual'
+        }
+    });
+
+    assert.match(result.initialBodyText, /请下载适合这台 Mac 的安装包/);
+    assert.match(result.initialBodyText, /前往下载/);
+    assert.doesNotMatch(result.initialBodyText, /立即升级|查看更新内容/);
+    assert.equal(result.interaction.openReleaseCalls, 1);
+    assert.equal(result.interaction.downloadCalls, 0);
+    assert.equal(result.interaction.installCalls, 0);
+    assert.equal(result.interaction.skippedVersion, '1.4.0');
+});
+
 for (const scenario of scenarios) {
     test(`${scenario.label || scenario.page} uses the shared compact update shell`, async () => {
         const source = fs.readFileSync(path.join(projectRoot, scenario.page), 'utf8');

@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('updateAPI', {
   install: () => {
     ipcRenderer.send('update-install');
   },
+  openRelease: () => {
+    ipcRenderer.send('update-open-release');
+  },
   onState: (callback) => {
     const listener = (_event, state) => callback(state);
     ipcRenderer.on('update-state', listener);

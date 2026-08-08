@@ -1,6 +1,15 @@
 const API_URL = 'https://api.github.com/repos/labilio/lofi-radio/releases/latest';
 const RELEASES_URL = 'https://github.com/labilio/lofi-radio/releases/latest';
 
+function getUpdateDeliveryMode({ platform, isPackaged }) {
+    return platform === 'win32' && isPackaged ? 'automatic' : 'manual';
+}
+
+async function openLatestReleasePage({ openExternal, closeWindow }) {
+    await openExternal(RELEASES_URL);
+    closeWindow();
+}
+
 class UpdateCheckError extends Error {
     constructor(reason, message, status) {
         super(message);
@@ -215,8 +224,11 @@ async function checkLatestRelease({
 }
 
 module.exports = {
+    RELEASES_URL,
     checkLatestRelease,
     compareVersions,
+    getUpdateDeliveryMode,
     normalizeVersion,
+    openLatestReleasePage,
     shouldSkipUpdateReminder
 };

@@ -4,7 +4,11 @@ const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 const updateLogger = require('electron-log/main');
 const {
+  RELEASES_URL,
+  checkLatestRelease,
+  getUpdateDeliveryMode,
   normalizeVersion,
+  openLatestReleasePage,
   shouldSkipUpdateReminder
 } = require('./update-service');
 const { createAutoUpdateService } = require('./auto-update-service');
@@ -652,10 +656,16 @@ function playStation(index) {
 let updateWindow = null;
 let activeUpdateCheckSilent = false;
 let lastAvailableUpdateVersion = null;
-const autoUpdateService = createAutoUpdateService({
-  updater: autoUpdater,
-  logger: updateLogger
+const updateDeliveryMode = getUpdateDeliveryMode({
+  platform: process.platform,
+  isPackaged: app.isPackaged
 });
+const autoUpdateService = updateDeliveryMode === 'automatic'
+  ? createAutoUpdateService({
+      updater: autoUpdater,
+      logger: updateLogger
+    })
+  : null;
 
 function sendUpdateState(state) {
   if (updateWindow && !updateWindow.isDestroyed()) {
@@ -685,7 +695,12 @@ function handleAutoUpdateState(state) {
 
   if (['downloading', 'downloaded'].includes(state.status)) {
     if (!updateWindow || updateWindow.isDestroyed()) {
-      showUpdateWindow(app.getVersion(), state.version || lastAvailableUpdateVersion, state);
+      showUpdateWindow(
+        app.getVersion(),
+        state.version || lastAvailableUpdateVersion,
+        state,
+        'automatic'
+      );
     } else {
       sendUpdateState(state);
     }
@@ -704,12 +719,37 @@ function handleAutoUpdateState(state) {
   }
 }
 
-autoUpdateService.on('state', handleAutoUpdateState);
+autoUpdateService?.on('state', handleAutoUpdateState);
 
 async function checkForUpdates(silent = false) {
   activeUpdateCheckSilent = silent;
   console.log(`Checking for updates from version ${app.getVersion()}`);
-  await autoUpdateService.checkForUpdates();
+  if (updateDeliveryMode === 'automatic') {
+    await autoUpdateService.checkForUpdates();
+    return;
+  }
+
+  const result = await checkLatestRelease({ currentVersion: app.getVersion() });
+  if (result.status === 'update-available') {
+    lastAvailableUpdateVersion = result.latestVersion;
+    if (shouldSkipUpdateReminder({
+      silent,
+      latestVersion: result.latestVersion,
+      skippedUpdateVersion
+    })) {
+      console.log(`Update reminder skipped for version ${result.latestVersion}`);
+      return;
+    }
+    showUpdateWindow(app.getVersion(), result.latestVersion, null, 'manual');
+    return;
+  }
+
+  if (result.status === 'up-to-date') {
+    if (!silent) showLatestWindow(app.getVersion());
+    return;
+  }
+
+  if (!silent) showUpdateErrorWindow(result);
 }
 
 function showUpdateErrorWindow(result) {
@@ -751,7 +791,12 @@ function showUpdateErrorWindow(result) {
   });
 }
 
-function showUpdateWindow(currentVersion, latestVersion, initialState = null) {
+function showUpdateWindow(
+  currentVersion,
+  latestVersion,
+  initialState = null,
+  delivery = updateDeliveryMode
+) {
   if (updateWindow && !updateWindow.isDestroyed()) {
     updateWindow.focus();
     if (initialState) sendUpdateState(initialState);
@@ -782,7 +827,8 @@ function showUpdateWindow(currentVersion, latestVersion, initialState = null) {
   updateWindow.loadFile('update.html', {
     query: {
       current: currentVersion,
-      latest: latestVersion
+      latest: latestVersion,
+      delivery
     }
   });
 
@@ -837,15 +883,29 @@ function showLatestWindow(currentVersion, updated = false) {
 }
 
 ipcMain.on('update-download', () => {
+  if (!autoUpdateService) return;
   void autoUpdateService.downloadUpdate().catch(error => {
     console.error('Failed to download update:', error);
   });
 });
 
 ipcMain.on('update-install', () => {
-  if (!autoUpdateService.quitAndInstall()) {
+  if (!autoUpdateService?.quitAndInstall()) {
     console.warn('Ignored update install request before download completed');
   }
+});
+
+ipcMain.on('update-open-release', () => {
+  void openLatestReleasePage({
+    openExternal: url => shell.openExternal(url),
+    closeWindow: () => {
+      if (updateWindow && !updateWindow.isDestroyed()) {
+        updateWindow.close();
+      }
+    }
+  }).catch(error => {
+    console.error(`Failed to open ${RELEASES_URL}:`, error);
+  });
 });
 
 ipcMain.on('update-view-changes', () => {

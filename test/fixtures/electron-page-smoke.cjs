@@ -103,6 +103,7 @@ async function inspectPage() {
                 let skippedVersion = null;
                 let downloadCalls = 0;
                 let installCalls = 0;
+                let openReleaseCalls = 0;
                 let stateListener = null;
                 window.updateAPI = {
                     download: () => {
@@ -110,6 +111,9 @@ async function inspectPage() {
                     },
                     install: () => {
                         installCalls += 1;
+                    },
+                    openRelease: () => {
+                        openReleaseCalls += 1;
                     },
                     onState: listener => {
                         stateListener = listener;
@@ -121,74 +125,85 @@ async function inspectPage() {
                 stateListener = stateListener || window.applyUpdateState;
                 document.getElementById('skipBtn').click();
                 document.getElementById('downloadBtn').click();
-                stateListener?.({
-                    status: 'downloading',
-                    percent: 42.4,
-                    transferred: 40.7 * 1000 * 1000,
-                    bytesPerSecond: 3.1 * 1000 * 1000,
-                    total: 96 * 1000 * 1000
-                });
-                const downloadingText = document.body.innerText;
-                const progressValue = document.getElementById('downloadProgress')?.value || null;
-                const downloadAmountText = document.getElementById('downloadAmount')?.textContent.trim() || null;
-                const downloadSpeedText = document.getElementById('downloadSpeed')?.textContent.trim() || null;
-                const downloadSpeedCount = document.querySelectorAll('.download-speed').length;
-                const downloadMetrics = document.getElementById('downloadMetrics');
-                const downloadMetricsDisplay = downloadMetrics
-                    ? getComputedStyle(downloadMetrics).display
-                    : null;
-                const downloadMetricsTextAlign = downloadMetrics
-                    ? getComputedStyle(downloadMetrics).textAlign
-                    : null;
-                const downloadPanelRect = document.getElementById('downloadStatus')
-                    ?.getBoundingClientRect();
-                const downloadStatusTextRect = document.getElementById('downloadStatusText')
-                    ?.getBoundingClientRect();
-                const downloadMetricsRect = downloadMetrics?.getBoundingClientRect();
-                const downloadMetricsRightGap = downloadPanelRect && downloadMetricsRect
-                    ? Math.round(downloadPanelRect.right - downloadMetricsRect.right)
-                    : null;
-                const downloadStatusToMetricsGap = downloadStatusTextRect && downloadMetricsRect
-                    ? Math.round(downloadMetricsRect.left - downloadStatusTextRect.right)
-                    : null;
-                if (updateInteractionStop !== 'downloading') {
-                    stateListener?.({ status: 'downloaded', version: '1.4.0' });
+                const manualDelivery = new URLSearchParams(location.search).get('delivery') === 'manual';
+                if (manualDelivery) {
+                    interaction = {
+                        skippedVersion,
+                        downloadCalls,
+                        installCalls,
+                        openReleaseCalls
+                    };
+                } else {
+                    stateListener?.({
+                        status: 'downloading',
+                        percent: 42.4,
+                        transferred: 40.7 * 1000 * 1000,
+                        bytesPerSecond: 3.1 * 1000 * 1000,
+                        total: 96 * 1000 * 1000
+                    });
+                    const downloadingText = document.body.innerText;
+                    const progressValue = document.getElementById('downloadProgress')?.value || null;
+                    const downloadAmountText = document.getElementById('downloadAmount')?.textContent.trim() || null;
+                    const downloadSpeedText = document.getElementById('downloadSpeed')?.textContent.trim() || null;
+                    const downloadSpeedCount = document.querySelectorAll('.download-speed').length;
+                    const downloadMetrics = document.getElementById('downloadMetrics');
+                    const downloadMetricsDisplay = downloadMetrics
+                        ? getComputedStyle(downloadMetrics).display
+                        : null;
+                    const downloadMetricsTextAlign = downloadMetrics
+                        ? getComputedStyle(downloadMetrics).textAlign
+                        : null;
+                    const downloadPanelRect = document.getElementById('downloadStatus')
+                        ?.getBoundingClientRect();
+                    const downloadStatusTextRect = document.getElementById('downloadStatusText')
+                        ?.getBoundingClientRect();
+                    const downloadMetricsRect = downloadMetrics?.getBoundingClientRect();
+                    const downloadMetricsRightGap = downloadPanelRect && downloadMetricsRect
+                        ? Math.round(downloadPanelRect.right - downloadMetricsRect.right)
+                        : null;
+                    const downloadStatusToMetricsGap = downloadStatusTextRect && downloadMetricsRect
+                        ? Math.round(downloadMetricsRect.left - downloadStatusTextRect.right)
+                        : null;
+                    if (updateInteractionStop !== 'downloading') {
+                        stateListener?.({ status: 'downloaded', version: '1.4.0' });
+                    }
+                    const downloadedButtonText = document.getElementById('downloadBtn').textContent.trim();
+                    const downloadedBodyText = document.body.innerText;
+                    const downloadedHasOverflow =
+                        document.documentElement.scrollHeight > document.documentElement.clientHeight;
+                    const downloadedActionsBottom = Math.round(
+                        document.querySelector('.actions').getBoundingClientRect().bottom
+                    );
+                    if (!updateInteractionStop) {
+                        document.getElementById('downloadBtn').click();
+                    }
+                    const installingText = document.body.innerText;
+                    const installingButtonText = document.getElementById('downloadBtn').textContent.trim();
+                    if (!updateInteractionStop) {
+                        await new Promise(resolve => setTimeout(resolve, 800));
+                    }
+                    interaction = {
+                        skippedVersion,
+                        downloadCalls,
+                        installCalls,
+                        openReleaseCalls,
+                        downloadingText,
+                        progressValue,
+                        downloadAmountText,
+                        downloadSpeedText,
+                        downloadSpeedCount,
+                        downloadMetricsDisplay,
+                        downloadMetricsTextAlign,
+                        downloadMetricsRightGap,
+                        downloadStatusToMetricsGap,
+                        downloadedButtonText,
+                        downloadedBodyText,
+                        downloadedHasOverflow,
+                        downloadedActionsBottom,
+                        installingText,
+                        installingButtonText
+                    };
                 }
-                const downloadedButtonText = document.getElementById('downloadBtn').textContent.trim();
-                const downloadedBodyText = document.body.innerText;
-                const downloadedHasOverflow =
-                    document.documentElement.scrollHeight > document.documentElement.clientHeight;
-                const downloadedActionsBottom = Math.round(
-                    document.querySelector('.actions').getBoundingClientRect().bottom
-                );
-                if (!updateInteractionStop) {
-                    document.getElementById('downloadBtn').click();
-                }
-                const installingText = document.body.innerText;
-                const installingButtonText = document.getElementById('downloadBtn').textContent.trim();
-                if (!updateInteractionStop) {
-                    await new Promise(resolve => setTimeout(resolve, 800));
-                }
-                interaction = {
-                    skippedVersion,
-                    downloadCalls,
-                    installCalls,
-                    downloadingText,
-                    progressValue,
-                    downloadAmountText,
-                    downloadSpeedText,
-                    downloadSpeedCount,
-                    downloadMetricsDisplay,
-                    downloadMetricsTextAlign,
-                    downloadMetricsRightGap,
-                    downloadStatusToMetricsGap,
-                    downloadedButtonText,
-                    downloadedBodyText,
-                    downloadedHasOverflow,
-                    downloadedActionsBottom,
-                    installingText,
-                    installingButtonText
-                };
             } else if (shouldRunInteractions && location.pathname.endsWith('/settings.html')) {
                 const saved = {};
                 let resolveLaunchAtStartup;

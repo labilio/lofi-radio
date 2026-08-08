@@ -59,13 +59,24 @@
         const urlParams = new URLSearchParams(window.location.search);
         const currentVersion = urlParams.get('current') || '—';
         const latestVersion = urlParams.get('latest') || '—';
+        const deliveryMode = urlParams.get('delivery') === 'manual' ? 'manual' : 'automatic';
         let updateState = 'available';
         let installTimer = null;
 
         document.getElementById('currentVersion').textContent = currentVersion;
         document.getElementById('latestVersion').textContent = latestVersion;
 
+        if (deliveryMode === 'manual') {
+            document.getElementById('updateMessage').textContent = '请下载适合这台 Mac 的安装包，打开后即可升级。';
+            document.getElementById('downloadBtn').textContent = '前往下载';
+            document.getElementById('viewChangesBtn').hidden = true;
+        }
+
         document.getElementById('downloadBtn').addEventListener('click', () => {
+            if (deliveryMode === 'manual') {
+                window.updateAPI?.openRelease();
+                return;
+            }
             if (updateState === 'downloaded') {
                 applyUpdateState({ status: 'installing' });
                 installTimer = setTimeout(() => {

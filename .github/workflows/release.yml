@@ -62,7 +62,7 @@ jobs:
 
           $env:RUN_PACKAGED_CONTENT_AUDIT = '1'
           node --test test/packaged-content.test.js
-          $env:RUN_PACKAGED_SUBPAGE_TESTS = '1'
+          $env:RUN_PACKAGED_SUBPAGE_INTEGRATION = '1'
           node --test test/packaged-subpages.test.js
 
           $userDataDir = Join-Path $env:RUNNER_TEMP 'lofi-radio-launch-smoke'
@@ -110,7 +110,25 @@ jobs:
             throw 'Staged updater assets are empty'
           }
 
-          Get-FileHash -Algorithm SHA256 -Path @($metadataPath, $stagedInstaller, $stagedBlockmap) |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $greenName = "Lofi-Radio-Player-$version-Green.zip"
+          $greenPath = Join-Path $stage $greenName
+          Compress-Archive -Path 'dist_green/win-unpacked/*' -DestinationPath $greenPath
+
+          $greenAudit = Join-Path $env:RUNNER_TEMP 'lofi-radio-green-audit'
+          Expand-Archive -LiteralPath $greenPath -DestinationPath $greenAudit
+          $greenExe = Join-Path $greenAudit 'Lofi Radio Player.exe'
+          $greenAsar = Join-Path $greenAudit 'resources/app.asar'
+          if (-not (Test-Path -LiteralPath $greenExe) -or -not (Test-Path -LiteralPath $greenAsar)) {
+            throw 'Green ZIP is missing the executable or resources/app.asar'
+          }
+          foreach ($unexpected in @('node_modules', 'test', '.git')) {
+            if (Test-Path -LiteralPath (Join-Path $greenAudit $unexpected)) {
+              throw "Green ZIP contains development artifact: $unexpected"
+            }
+          }
+
+          Get-FileHash -Algorithm SHA256 -Path @($metadataPath, $stagedInstaller, $stagedBlockmap, $greenPath) |
             ForEach-Object { "$($_.Hash.ToLower())  $([System.IO.Path]::GetFileName($_.Path))" } |
             Set-Content -Encoding utf8 (Join-Path $stage 'SHA256SUMS-windows-x64.txt')
 

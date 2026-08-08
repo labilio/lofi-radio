@@ -4,6 +4,8 @@ const assert = require('node:assert/strict');
 const {
     checkLatestRelease,
     compareVersions,
+    getUpdateDeliveryMode,
+    openLatestReleasePage,
     shouldSkipUpdateReminder
 } = require('../update-service');
 
@@ -28,6 +30,30 @@ test('numeric version comparison handles double-digit minor versions', () => {
     assert.equal(compareVersions('1.10.0', '1.9.0'), 1);
     assert.equal(compareVersions('1.3.0', '1.3.0'), 0);
     assert.equal(compareVersions('1.2.9', '1.3.0'), -1);
+});
+
+test('only packaged Windows builds use the automatic installer delivery', () => {
+    assert.equal(getUpdateDeliveryMode({ platform: 'win32', isPackaged: true }), 'automatic');
+    assert.equal(getUpdateDeliveryMode({ platform: 'darwin', isPackaged: true }), 'manual');
+    assert.equal(getUpdateDeliveryMode({ platform: 'linux', isPackaged: true }), 'manual');
+    assert.equal(getUpdateDeliveryMode({ platform: 'win32', isPackaged: false }), 'manual');
+});
+
+test('manual delivery opens only the trusted latest Release and then closes its window', async () => {
+    const openedUrls = [];
+    let closeCalls = 0;
+
+    await openLatestReleasePage({
+        openExternal: async url => openedUrls.push(url),
+        closeWindow: () => {
+            closeCalls += 1;
+        }
+    });
+
+    assert.deepEqual(openedUrls, [
+        'https://github.com/labilio/lofi-radio/releases/latest'
+    ]);
+    assert.equal(closeCalls, 1);
 });
 
 test('silent reminders are skipped only for the exact version the user chose', () => {

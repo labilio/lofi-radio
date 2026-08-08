@@ -49,6 +49,12 @@ test('Windows job builds and validates updater-compatible NSIS assets', () => {
   assert.match(workflow, /Start-Process/);
   assert.match(workflow, /--user-data-dir/);
   assert.match(workflow, /0x8664/);
+  assert.match(workflow, /RUN_PACKAGED_SUBPAGE_INTEGRATION\s*=\s*'1'/);
+  assert.doesNotMatch(workflow, /RUN_PACKAGED_SUBPAGE_TESTS/);
+  assert.match(workflow, /Lofi-Radio-Player-\$\{?version\}?\-Green\.zip/i);
+  assert.match(workflow, /Compress-Archive/);
+  assert.match(workflow, /resources[\\/]app\.asar/);
+  assert.doesNotMatch(workflow, /electron-builder[^\r\n]*--win[^\r\n]*portable/i);
 });
 
 test('macOS jobs build, verify, and launch native arm64 and Intel packages', () => {
