@@ -190,8 +190,6 @@ macOS 版本也会自动检查新版本，但目前需要前往 Releases 手动�
 - 代码适配：快捷键 `Option + Q`、全局快捷键跨平台兼容
 - 构建配置：DMG 安装包、macOS 打包配置
 
-[@0xBrick-Li](https://github.com/0xBrick-Li) - Web3 实习计划学员（ETH Panda / LXDAO）
-
 ## 🛠️ 开发说明
 
 ### 技术栈
