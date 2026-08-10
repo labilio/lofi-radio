@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 let createAudioWindowWebPreferences;
 try {
-  ({ createAudioWindowWebPreferences } = require('../../audio-window-config'));
+  ({ createAudioWindowWebPreferences } = require('../../src/main/audio/window-config'));
 } catch (error) {
   process.stderr.write(`${error.stack || error.message}\n`);
   app.whenReady().then(() => app.exit(1));
@@ -36,7 +36,7 @@ async function run() {
     }
   });
 
-  await window.loadFile(path.join(projectRoot, 'audio.html'));
+  await window.loadFile(path.join(projectRoot, 'src', 'renderer', 'audio', 'index.html'));
   const pageState = await window.webContents.executeJavaScript(`
     ({
       runtime: {

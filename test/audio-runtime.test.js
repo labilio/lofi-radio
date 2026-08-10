@@ -5,7 +5,7 @@ const {
   DirectMediaAdapter,
   HlsMediaAdapter,
   mapMediaError
-} = require('../audio-runtime');
+} = require('../src/shared/audio/runtime');
 
 class FakeMedia extends EventTarget {
   constructor() {

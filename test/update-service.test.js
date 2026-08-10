@@ -7,7 +7,7 @@ const {
     getUpdateDeliveryMode,
     openLatestReleasePage,
     shouldSkipUpdateReminder
-} = require('../update-service');
+} = require('../src/main/services/update-service');
 
 function response({
     ok = true,

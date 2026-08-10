@@ -7,7 +7,7 @@ const {
   DirectAudioAdapter,
   HlsAudioAdapter,
   BilibiliAudioAdapter
-} = require('../audio-window-adapters');
+} = require('../src/main/audio/window-adapters');
 
 class FakeWebContents {
   constructor() {
@@ -71,7 +71,7 @@ test('direct adapter loads the local player and sends the complete session reque
 
   await adapter.load(directRequest);
 
-  assert.equal(path.basename(window.loadedFiles[0]), 'audio.html');
+  assert.equal(path.basename(window.loadedFiles[0]), 'index.html');
   assert.deepEqual(window.sizes[0], [1, 1]);
   assert.deepEqual(window.webContents.messages[0], {
     channel: 'audio-command-load',

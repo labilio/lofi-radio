@@ -2,7 +2,7 @@
   "name": "lofi-radio-player",
   "version": "1.3.0",
   "description": "Lofi Radio Player",
-  "main": "main.js",
+  "main": "src/main/index.js",
   "homepage": "./",
   "scripts": {
     "test": "node --test test/*.test.js",
@@ -41,50 +41,14 @@
     "files": [
       "package.json",
       "LICENSE",
-      "icon.ico",
-      "icon.icns",
-      "icon.png",
-      "audio.html",
-      "audio-preload.js",
-      "audio-output-monitor.js",
-      "audio-runtime.js",
-      "audio-window-adapters.js",
-      "audio-window-config.js",
-      "bilibili-media-adapter.js",
-      "history.css",
-      "history.html",
-      "history.js",
-      "index.html",
-      "main.js",
-      "playback-controller.js",
-      "playback-presentation.js",
-      "preload.js",
-      "window-shortcut-prevention.js",
-      "renderer.js",
-      "settings.css",
-      "settings.html",
-      "settings.js",
-      "stations.json",
-      "startup-service.js",
-      "styles.css",
-      "subpage-foundation.css",
-      "subpage-window.js",
-      "update.css",
-      "update.html",
-      "update-error.html",
-      "update-latest.html",
-      "update-preload.js",
-      "auto-update-service.js",
-      "update-service.js",
-      "webawesome-components.js",
-      "widget.js",
-      "window-sizing.js"
+      "src/**/*",
+      "resources/**/*"
     ],
     "asarUnpack": [
       "node_modules/@awesome.me/webawesome/**/*"
     ],
     "win": {
-      "icon": "icon.ico",
+      "icon": "resources/icons/icon.ico",
       "target": [
         "nsis"
       ]
@@ -97,7 +61,7 @@
       }
     ],
     "mac": {
-      "icon": "icon.icns",
+      "icon": "resources/icons/icon.icns",
       "identity": "-",
       "target": [
         "dir",
@@ -131,9 +95,9 @@
     "nsis": {
       "oneClick": true,
       "allowToChangeInstallationDirectory": false,
-      "installerIcon": "icon.ico",
-      "uninstallerIcon": "icon.ico",
-      "installerHeaderIcon": "icon.ico",
+      "installerIcon": "resources/icons/icon.ico",
+      "uninstallerIcon": "resources/icons/icon.ico",
+      "installerHeaderIcon": "resources/icons/icon.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Lofi Radio Player"

@@ -2,7 +2,10 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
-const { inspectElectronPage } = require('./electron-test-utils');
+const {
+    inspectElectronPage,
+    resolveElectronPagePath
+} = require('./electron-test-utils');
 
 const projectRoot = path.resolve(__dirname, '..');
 const scenarios = [
@@ -56,12 +59,12 @@ test('manual delivery opens the trusted release page without starting an in-app 
 
 for (const scenario of scenarios) {
     test(`${scenario.label || scenario.page} uses the shared compact update shell`, async () => {
-        const source = fs.readFileSync(path.join(projectRoot, scenario.page), 'utf8');
+        const source = fs.readFileSync(resolveElectronPagePath(scenario.page), 'utf8');
         const result = await inspectElectronPage(scenario.page, [], {
             query: scenario.query
         });
 
-        assert.match(source, /<link[^>]+href=["']update\.css["']/i);
+        assert.match(source, /<link[^>]+href=["']styles\.css["']/i);
         assert.doesNotMatch(source, /<style[\s>]/i);
         assert.doesNotMatch(result.initialBodyText, /🎁|🚀/u);
         assert.match(result.initialBodyText, /LOFI RADIO/);
@@ -142,9 +145,9 @@ test('all update states form one compact content group', async () => {
 });
 
 test('latest-version star button opens the repository while release buttons keep opening Releases', () => {
-    const latestPage = fs.readFileSync(path.join(projectRoot, 'update-latest.html'), 'utf8');
-    const preload = fs.readFileSync(path.join(projectRoot, 'update-preload.js'), 'utf8');
-    const main = fs.readFileSync(path.join(projectRoot, 'main.js'), 'utf8');
+    const latestPage = fs.readFileSync(resolveElectronPagePath('update-latest.html'), 'utf8');
+    const preload = fs.readFileSync(path.join(projectRoot, 'src', 'preload', 'update.js'), 'utf8');
+    const main = fs.readFileSync(path.join(projectRoot, 'src', 'main', 'index.js'), 'utf8');
 
     assert.match(latestPage, /updateAPI\?\.viewRepository\(\)/);
     assert.match(preload, /viewRepository[\s\S]*update-view-repository/);

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const mainSource = fs.readFileSync(
-  path.resolve(__dirname, '..', 'main.js'),
+  path.resolve(__dirname, '..', 'src', 'main', 'index.js'),
   'utf8'
 );
 
@@ -18,7 +18,7 @@ test('main process keeps media-key handling disabled to avoid headset pause dead
 test('main process starts and disposes controlled audio output monitoring', () => {
   assert.match(
     mainSource,
-    /require\(['"]\.\/audio-output-monitor['"]\)/
+    /require\(['"]\.\.\/shared\/audio\/output-monitor['"]\)/
   );
   assert.match(
     mainSource,

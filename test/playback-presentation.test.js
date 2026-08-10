@@ -4,7 +4,7 @@ const assert = require('node:assert/strict');
 const {
   getPlaybackPresentation,
   isFocusPlaybackActive
-} = require('../playback-presentation');
+} = require('../src/renderer/widget/playback-presentation');
 
 test('transient playback states temporarily replace the configured subtitle', () => {
   assert.deepEqual(getPlaybackPresentation({ state: 'connecting' }), {

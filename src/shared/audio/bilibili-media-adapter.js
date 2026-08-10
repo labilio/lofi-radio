@@ -1,4 +1,4 @@
-const { mapMediaError } = require('./audio-runtime');
+const { mapMediaError } = require('./runtime');
 
 class BilibiliMediaAdapter {
   constructor(options = {}) {

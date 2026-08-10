@@ -1,8 +1,24 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('node:path');
-const { resizeFixedWindow } = require(path.resolve(__dirname, '..', '..', 'window-sizing'));
+const { resizeFixedWindow } = require(path.resolve(
+    __dirname,
+    '..',
+    '..',
+    'src',
+    'main',
+    'windows',
+    'sizing'
+));
 
-const settingsPath = path.resolve(__dirname, '..', '..', 'settings.html');
+const settingsPath = path.resolve(
+    __dirname,
+    '..',
+    '..',
+    'src',
+    'renderer',
+    'settings',
+    'index.html'
+);
 const heightMessagePrefix = 'LOFI_SETTINGS_HEIGHT:';
 
 async function waitForLayout(window) {

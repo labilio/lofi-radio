@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { BilibiliMediaAdapter } = require('../bilibili-media-adapter');
+const { BilibiliMediaAdapter } = require('../src/shared/audio/bilibili-media-adapter');
 
 class FakeScheduler {
   constructor() {

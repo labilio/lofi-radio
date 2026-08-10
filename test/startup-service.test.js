@@ -6,7 +6,7 @@ const {
     getLaunchAtStartupStatus,
     initializeLaunchAtStartup,
     setLaunchAtStartup
-} = require('../startup-service');
+} = require('../src/main/services/startup-service');
 
 test('development mode registers Electron with the application path', () => {
     const options = createLoginItemOptions({

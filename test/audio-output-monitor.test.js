@@ -4,7 +4,7 @@ const { EventEmitter } = require('node:events');
 
 function loadAudioOutputMonitor() {
   try {
-    return require('../audio-output-monitor');
+    return require('../src/shared/audio/output-monitor');
   } catch {
     return {};
   }

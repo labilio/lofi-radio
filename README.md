@@ -12,9 +12,15 @@
 Lofi Radio 于 2026.05 正式突破 200+ Stars！真的非常感谢大家的支持！新功能 comming soon！
 
 
-[![Star History Chart](https://api.star-history.com/svg?repos=labilio/lofi-radio&type=Date)](https://star-history.com/#labilio/lofi-radio&Date)
+<a href="https://www.star-history.com/?type=date&repos=labilio%2Flofi-radio">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=labilio/lofi-radio&type=date&theme=dark&legend=top-left&sealed_token=jOEjaBlJiJwjo_kKB5VJKI5jaalzXTI67J3_3NEa8Dctsl66ntE4ZVgp2vtTfymH9b2g4n-eqkrllpzhcx6UPPjur-hlTKcH4Kcr8OYmOIbhQzWmgE2yN3CSwrfOUsjSL7VIIQ8raY0dNHn7EmfyRQ5w7otxvenC1X4jrzLI4iNQDkJWAbki1TgyEul8" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=labilio/lofi-radio&type=date&legend=top-left&sealed_token=jOEjaBlJiJwjo_kKB5VJKI5jaalzXTI67J3_3NEa8Dctsl66ntE4ZVgp2vtTfymH9b2g4n-eqkrllpzhcx6UPPjur-hlTKcH4Kcr8OYmOIbhQzWmgE2yN3CSwrfOUsjSL7VIIQ8raY0dNHn7EmfyRQ5w7otxvenC1X4jrzLI4iNQDkJWAbki1TgyEul8" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=labilio/lofi-radio&type=date&legend=top-left&sealed_token=jOEjaBlJiJwjo_kKB5VJKI5jaalzXTI67J3_3NEa8Dctsl66ntE4ZVgp2vtTfymH9b2g4n-eqkrllpzhcx6UPPjur-hlTKcH4Kcr8OYmOIbhQzWmgE2yN3CSwrfOUsjSL7VIIQ8raY0dNHn7EmfyRQ5w7otxvenC1X4jrzLI4iNQDkJWAbki1TgyEul8" />
+ </picture>
+</a>
 
-![v1.1.0-showcase](./images/v1.1.0-showcase.gif)
+![v1.1.0-showcase](./docs/assets/screenshots/v1.1.0-showcase.gif)
 
 **几乎所有手机都有灵动岛功能，也有大量的专注计时器软件，电脑为什么没有呢？**
 
@@ -35,7 +41,7 @@ Lofi Radio 于 2026.05 正式突破 200+ Stars！真的非常感谢大家的支�
 
 **macOS 用户：请在屏幕顶部右侧菜单栏点击图标即可。**
 
-![v1.2.0 - tiny poster](./images/v1.2.0%20-%20tiny%20poster.jpg)
+![v1.2.0 - tiny poster](./docs/assets/screenshots/v1.2.0%20-%20tiny%20poster.jpg)
 
 
 
@@ -43,8 +49,8 @@ Lofi Radio 于 2026.05 正式突破 200+ Stars！真的非常感谢大家的支�
 
 | 普通模式 | Mini 模式 (灵动岛风格) |
 | :---: | :---: |
-| <img src="./images/v1.1.0-normal-mode.png" width="400"/> | <img src="./images/v1.1.0-mini-mode.png" width="400"/> |
-| <img src="./images/v1.1.0-normal-website.png" width="400"/> | <img src="./images/v1.1.0-mini-website.png" width="400"/> |
+| <img src="./docs/assets/screenshots/v1.1.0-normal-mode.png" width="400"/> | <img src="./docs/assets/screenshots/v1.1.0-mini-mode.png" width="400"/> |
+| <img src="./docs/assets/screenshots/v1.1.0-normal-website.png" width="400"/> | <img src="./docs/assets/screenshots/v1.1.0-mini-website.png" width="400"/> |
 | *黑胶唱片质感* | *小巧玲珑，不占空间* |
 
 
@@ -166,6 +172,24 @@ ALT+Q (Windows) / Option+Q (macOS)
 - Electron - 跨平台桌面应用框架
 - HTML5 Audio + HLS.js - 流媒体播放
 - CSS3 - 毛玻璃效果与动画
+
+---
+
+## 🧭 项目结构
+
+项目按 Electron 的进程边界组织：
+
+```text
+src/main/       主进程、窗口与系统服务
+src/preload/    renderer 与主进程之间的安全桥接
+src/renderer/   按窗口组织的 HTML、CSS 和页面脚本
+src/shared/     跨进程复用的纯 JavaScript 模块
+resources/      电台数据与应用图标
+scripts/        开发和诊断脚本
+test/           自动化测试
+```
+
+具体职责和数据流见 [项目结构说明](./docs/architecture.md)。
 
 ---
 

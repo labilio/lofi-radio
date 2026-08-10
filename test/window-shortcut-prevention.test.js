@@ -6,7 +6,7 @@ const path = require('node:path');
 
 function loadWindowShortcutPrevention() {
   try {
-    return require('../window-shortcut-prevention');
+    return require('../src/main/windows/shortcut-prevention');
   } catch {
     return {};
   }

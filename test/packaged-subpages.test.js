@@ -1,7 +1,10 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
-const { inspectElectronPage } = require('./electron-test-utils');
+const {
+    inspectElectronPage,
+    resolveElectronPagePath
+} = require('./electron-test-utils');
 
 const runPackagedIntegration =
     process.env.RUN_PACKAGED_SUBPAGE_INTEGRATION === '1';
@@ -28,7 +31,7 @@ for (const scenario of [
                 scenario.page,
                 scenario.tags,
                 {
-                    absolutePagePath: path.join(packagedRoot, scenario.page)
+                    absolutePagePath: resolveElectronPagePath(scenario.page, packagedRoot)
                 }
             );
 

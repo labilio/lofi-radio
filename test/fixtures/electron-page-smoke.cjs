@@ -3,18 +3,15 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const pagePath = path.resolve(process.argv[2]);
+const pageKind = process.env.PAGE_KIND || '';
 const expectedTags = process.argv.slice(3);
 const shouldRunInteractions = process.env.SKIP_PAGE_INTERACTIONS !== '1';
 const updateInteractionStop = process.env.UPDATE_INTERACTION_STOP || '';
 
 async function inspectPage() {
-    const isSettingsPage = pagePath.endsWith('settings.html');
-    const isHistoryPage = pagePath.endsWith('history.html');
-    const isUpdatePage = [
-        'update.html',
-        'update-latest.html',
-        'update-error.html'
-    ].some(file => pagePath.endsWith(file));
+    const isSettingsPage = pageKind === 'settings';
+    const isHistoryPage = pageKind === 'history';
+    const isUpdatePage = pageKind.startsWith('update-');
     const window = new BrowserWindow({
         width: isSettingsPage ? 500 : 420,
         height: isSettingsPage ? 720 : (isUpdatePage ? 260 : 400),
@@ -99,7 +96,8 @@ async function inspectPage() {
             let interaction;
             const shouldRunInteractions = ${JSON.stringify(shouldRunInteractions)};
             const updateInteractionStop = ${JSON.stringify(updateInteractionStop)};
-            if (shouldRunInteractions && location.pathname.endsWith('/update.html')) {
+            const pageKind = ${JSON.stringify(pageKind)};
+            if (shouldRunInteractions && pageKind === 'update-available') {
                 let skippedVersion = null;
                 let downloadCalls = 0;
                 let installCalls = 0;
@@ -204,7 +202,7 @@ async function inspectPage() {
                         installingButtonText
                     };
                 }
-            } else if (shouldRunInteractions && location.pathname.endsWith('/settings.html')) {
+            } else if (shouldRunInteractions && pageKind === 'settings') {
                 const saved = {};
                 let resolveLaunchAtStartup;
                 window.settingsAPI = {
@@ -305,7 +303,7 @@ async function inspectPage() {
                     recordingShortcutValue,
                     recordingShortcutBorder
                 };
-            } else if (shouldRunInteractions && location.pathname.endsWith('/history.html')) {
+            } else if (shouldRunInteractions && pageKind === 'history') {
                 const initialPeriod = document.getElementById('summaryPeriod')?.textContent.trim() || null;
                 const initialTotal = document.getElementById('summaryTotal')?.textContent.trim() || null;
                 const initialToday = document.getElementById('summaryToday')?.textContent.trim() || null;
@@ -398,7 +396,7 @@ async function inspectPage() {
                 : null;
 
             let layout;
-            if (location.pathname.endsWith('/settings.html')) {
+            if (pageKind === 'settings') {
                 const scrollArea = document.querySelector('.settings-scroll');
                 const launchSwitch = document.getElementById('launchAtStartupToggle');
                 const sectionTitle = document.querySelector('.setting-copy h2');
@@ -459,11 +457,7 @@ async function inspectPage() {
                         ? getComputedStyle(settingsButtonBase).fontSize
                         : null
                 };
-            } else if (
-                location.pathname.endsWith('/update.html')
-                || location.pathname.endsWith('/update-latest.html')
-                || location.pathname.endsWith('/update-error.html')
-            ) {
+            } else if (pageKind.startsWith('update-')) {
                 const message = document.querySelector('.message');
                 const versionCaption = document.querySelector('.version-caption');
                 const versionValue = document.querySelector('.version-value');
@@ -532,7 +526,7 @@ async function inspectPage() {
                         };
                     })
                 };
-            } else if (location.pathname.endsWith('/history.html')) {
+            } else if (pageKind === 'history') {
                 const historyTitle = document.querySelector('.titlebar h1, .history-header h1');
                 const summaryPanel = document.querySelector('.summary-panel');
                 const summaryLabel = document.querySelector('.summary-label');

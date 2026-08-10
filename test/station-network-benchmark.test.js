@@ -31,7 +31,7 @@ test('benchmark CLI exposes a runnable help entry point', () => {
 
 test('Windows double-click launcher forwards CLI options to the benchmark', () => {
   if (process.platform !== 'win32') return;
-  const launcherPath = path.join(projectRoot, 'benchmark-stations.cmd');
+  const launcherPath = path.join(projectRoot, 'scripts', 'benchmark-stations.cmd');
   const result = spawnSync('cmd.exe', ['/d', '/c', launcherPath, '--help'], {
     cwd: projectRoot,
     env: { ...process.env, LOFI_BENCHMARK_NO_PAUSE: '1' },

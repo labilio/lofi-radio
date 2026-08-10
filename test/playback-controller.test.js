@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const { PlaybackController } = require('../playback-controller');
+const { PlaybackController } = require('../src/main/playback/controller');
 
 class FakeClock {
   constructor() {

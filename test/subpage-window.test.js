@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 
-const subpageWindow = require('../subpage-window');
+const subpageWindow = require('../src/main/windows/subpage-window');
 const { showWindowWhenReady } = subpageWindow;
 
 function createFakeWindow({ visible = false, destroyed = false } = {}) {

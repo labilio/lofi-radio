@@ -67,7 +67,7 @@ async function run() {
     }
   });
 
-  await window.loadFile(path.join(projectRoot, 'index.html'));
+  await window.loadFile(path.join(projectRoot, 'src', 'renderer', 'widget', 'index.html'));
   await wait(250);
   const initial = await readState(window);
 

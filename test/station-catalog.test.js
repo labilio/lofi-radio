@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const stations = require('../stations.json');
+const stations = require('../resources/stations.json');
 
 test('the shipped station catalog excludes the unavailable Chill Sky source', () => {
   assert.equal(stations.some((station) => station.name === 'Chill Sky'), false);

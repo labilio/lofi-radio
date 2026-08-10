@@ -10,7 +10,7 @@ async function run() {
     height: 100,
     show: false,
     webPreferences: {
-      preload: path.join(projectRoot, 'preload.js'),
+      preload: path.join(projectRoot, 'src', 'preload', 'main.js'),
       contextIsolation: true,
       nodeIntegration: false,
       partition: `lofi-widget-preload-smoke-${process.pid}`
