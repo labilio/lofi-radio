@@ -12,7 +12,7 @@ test('packaging is configured for installable GitHub updates', () => {
 
   assert.match(packageJson.dependencies['electron-updater'], /^6\./);
   assert.match(packageJson.dependencies['electron-log'], /^5\./);
-  assert.equal(packageJson.build.files.includes('auto-update-service.js'), true);
+  assert.equal(packageJson.build.files.includes('src/**/*'), true);
   assert.deepEqual(packageJson.build.win.target, ['nsis']);
   assert.equal(packageJson.build.nsis.oneClick, true);
   assert.equal(packageJson.build.nsis.allowToChangeInstallationDirectory, false);
@@ -26,14 +26,14 @@ test('packaging is configured for installable GitHub updates', () => {
 });
 
 test('a completed installer launch opens the compact upgrade-success state', () => {
-  const main = fs.readFileSync(path.join(projectRoot, 'main.js'), 'utf8');
+  const main = fs.readFileSync(path.join(projectRoot, 'src', 'main', 'index.js'), 'utf8');
 
   assert.match(main, /process\.argv\.includes\(['"]--updated['"]\)/);
   assert.match(main, /showLatestWindow\(app\.getVersion\(\), true\)/);
 });
 
 test('application checks once after startup without periodic update polling', () => {
-  const main = fs.readFileSync(path.join(projectRoot, 'main.js'), 'utf8');
+  const main = fs.readFileSync(path.join(projectRoot, 'src', 'main', 'index.js'), 'utf8');
 
   assert.match(main, /setTimeout\(\(\) => \{\s*checkForUpdates\(true\);\s*\}, 5000\)/);
   assert.doesNotMatch(main, /setInterval\([^)]*checkForUpdates|checkForUpdates[^;]*setInterval/s);

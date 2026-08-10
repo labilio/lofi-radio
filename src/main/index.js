@@ -3,6 +3,16 @@ const path = require('path');
 const fs = require('fs');
 const { autoUpdater } = require('electron-updater');
 const updateLogger = require('electron-log/main');
+
+const projectRoot = path.resolve(__dirname, '..', '..');
+const preloadRoot = path.join(projectRoot, 'src', 'preload');
+const rendererRoot = path.join(projectRoot, 'src', 'renderer');
+const resourcesRoot = path.join(projectRoot, 'resources');
+
+const preloadPath = (...segments) => path.join(preloadRoot, ...segments);
+const rendererPath = (...segments) => path.join(rendererRoot, ...segments);
+const resourcePath = (...segments) => path.join(resourcesRoot, ...segments);
+
 const {
   RELEASES_URL,
   checkLatestRelease,
@@ -10,23 +20,23 @@ const {
   normalizeVersion,
   openLatestReleasePage,
   shouldSkipUpdateReminder
-} = require('./update-service');
-const { createAutoUpdateService } = require('./auto-update-service');
+} = require('./services/update-service');
+const { createAutoUpdateService } = require('./services/auto-update-service');
 const {
   getLaunchAtStartupStatus,
   initializeLaunchAtStartup,
   setLaunchAtStartup
-} = require('./startup-service');
-const { fitSettingsWindow, showWindowWhenReady } = require('./subpage-window');
-const { PlaybackController } = require('./playback-controller');
-const { createAudioWindowAdapter } = require('./audio-window-adapters');
-const { createAudioWindowWebPreferences } = require('./audio-window-config');
+} = require('./services/startup-service');
+const { fitSettingsWindow, showWindowWhenReady } = require('./windows/subpage-window');
+const { PlaybackController } = require('./playback/controller');
+const { createAudioWindowAdapter } = require('./audio/window-adapters');
+const { createAudioWindowWebPreferences } = require('./audio/window-config');
 const {
   startAudioOutputMonitoring
-} = require('./audio-output-monitor');
+} = require('../shared/audio/output-monitor');
 const {
   installWindowShortcutPrevention
-} = require('./window-shortcut-prevention');
+} = require('./windows/shortcut-prevention');
 
 const configPath = path.join(app.getPath('userData'), 'config.json');
 
@@ -212,7 +222,7 @@ function getIconPath() {
     : ['icon.ico', 'icon.png'];
   
   for (const iconFile of iconFormats) {
-    const iconPath = path.join(__dirname, iconFile);
+    const iconPath = resourcePath('icons', iconFile);
     if (fs.existsSync(iconPath)) {
       console.log(`Using icon: ${iconFile}`);
       return iconPath;
@@ -286,7 +296,7 @@ function createWindow() {
         nodeIntegration: false,
         contextIsolation: true,
         enableRemoteModule: false,
-        preload: path.join(__dirname, 'preload.js'),
+        preload: preloadPath('main.js'),
         webSecurity: true,
         allowRunningInsecureContent: false
       },
@@ -312,7 +322,7 @@ function createWindow() {
     return;
   }
 
-  mainWindow.loadFile('index.html');
+  mainWindow.loadFile(rendererPath('widget', 'index.html'));
   console.log('Loading lofi radio widget...');
 
   const { screen } = require('electron');
@@ -512,7 +522,7 @@ function createAudioWindow() {
       height: 1,
       show: false,
       icon: iconPath,
-      webPreferences: createAudioWindowWebPreferences(__dirname),
+      webPreferences: createAudioWindowWebPreferences(projectRoot),
       skipTaskbar: true
     });
     installWindowShortcutPrevention(audioWindow);
@@ -544,7 +554,7 @@ function createSettingsWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: preloadPath('main.js')
     },
     resizable: false,
     minimizable: false,
@@ -564,7 +574,7 @@ function createSettingsWindow() {
   });
 
   showWindowWhenReady(settingsWindow);
-  settingsWindow.loadFile('settings.html');
+  settingsWindow.loadFile(rendererPath('settings', 'index.html'));
 
   settingsWindow.on('closed', () => {
     settingsWindow = null;
@@ -589,7 +599,7 @@ function createHistoryWindow() {
       contextIsolation: true,
       enableRemoteModule: false,
       webSecurity: true,
-      preload: path.join(__dirname, 'preload.js')
+      preload: preloadPath('main.js')
     },
     resizable: false,
     minimizable: false,
@@ -601,7 +611,7 @@ function createHistoryWindow() {
   installWindowShortcutPrevention(historyWindow);
 
   showWindowWhenReady(historyWindow);
-  historyWindow.loadFile('history.html');
+  historyWindow.loadFile(rendererPath('history', 'index.html'));
 
   historyWindow.on('closed', () => {
     historyWindow = null;
@@ -610,7 +620,7 @@ function createHistoryWindow() {
 
 function loadStations() {
   try {
-    const stationsPath = path.join(__dirname, 'stations.json');
+    const stationsPath = resourcePath('stations.json');
     if (fs.existsSync(stationsPath)) {
       const data = fs.readFileSync(stationsPath, 'utf8');
       stations = JSON.parse(data);
@@ -769,7 +779,7 @@ function showUpdateErrorWindow(result) {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'update-preload.js')
+      preload: preloadPath('update.js')
     },
     resizable: false,
     minimizable: false,
@@ -780,7 +790,7 @@ function showUpdateErrorWindow(result) {
   });
   installWindowShortcutPrevention(updateWindow);
 
-  updateWindow.loadFile('update-error.html', {
+  updateWindow.loadFile(rendererPath('update', 'error.html'), {
     query: {
       reason: result.reason || 'request-failed'
     }
@@ -813,7 +823,7 @@ function showUpdateWindow(
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'update-preload.js')
+      preload: preloadPath('update.js')
     },
     resizable: false,
     minimizable: false,
@@ -824,7 +834,7 @@ function showUpdateWindow(
   });
   installWindowShortcutPrevention(updateWindow);
 
-  updateWindow.loadFile('update.html', {
+  updateWindow.loadFile(rendererPath('update', 'available.html'), {
     query: {
       current: currentVersion,
       latest: latestVersion,
@@ -859,7 +869,7 @@ function showLatestWindow(currentVersion, updated = false) {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      preload: path.join(__dirname, 'update-preload.js')
+      preload: preloadPath('update.js')
     },
     resizable: false,
     minimizable: false,
@@ -870,7 +880,7 @@ function showLatestWindow(currentVersion, updated = false) {
   });
   installWindowShortcutPrevention(updateWindow);
 
-  updateWindow.loadFile('update-latest.html', {
+  updateWindow.loadFile(rendererPath('update', 'latest.html'), {
     query: {
       current: currentVersion,
       updated: updated ? '1' : '0'
@@ -1014,7 +1024,7 @@ function createTray() {
       console.log(`Tray icon loaded from: ${iconPath}`);
     } else {
       console.log('Creating default tray icon');
-      const defaultIcon = path.join(__dirname, 'icon.png');
+      const defaultIcon = resourcePath('icons', 'icon.png');
       if (fs.existsSync(defaultIcon)) {
         tray = new Tray(defaultIcon);
       } else {

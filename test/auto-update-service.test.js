@@ -2,7 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const { EventEmitter } = require('node:events');
 
-const { createAutoUpdateService } = require('../auto-update-service');
+const { createAutoUpdateService } = require('../src/main/services/auto-update-service');
 
 class FakeUpdater extends EventEmitter {
   constructor() {

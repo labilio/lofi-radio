@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('node:path');
 const {
   installWindowShortcutPrevention
-} = require('../../window-shortcut-prevention');
+} = require('../../src/main/windows/shortcut-prevention');
 
 ipcMain.on('get-shortcuts', event => {
   event.reply('shortcuts-data', {
@@ -28,7 +28,7 @@ async function inspectWindowShortcutRecording() {
   const window = new BrowserWindow({
     show: false,
     webPreferences: {
-      preload: path.resolve(__dirname, '..', '..', 'preload.js'),
+      preload: path.resolve(__dirname, '..', '..', 'src', 'preload', 'main.js'),
       contextIsolation: true,
       nodeIntegration: false,
       partition: `lofi-refresh-recording-${process.pid}`
@@ -49,7 +49,15 @@ async function inspectWindowShortcutRecording() {
     });
   });
 
-  await window.loadFile(path.resolve(__dirname, '..', '..', 'settings.html'));
+  await window.loadFile(path.resolve(
+    __dirname,
+    '..',
+    '..',
+    'src',
+    'renderer',
+    'settings',
+    'index.html'
+  ));
   await window.webContents.executeJavaScript(`
     Promise.all([
       customElements.whenDefined('wa-button'),

@@ -240,7 +240,10 @@ test('history uses one compact heading and presents today and period totals as e
 });
 
 test('history window opens at the viewport height required by the unified layout', () => {
-    const mainSource = fs.readFileSync(path.join(__dirname, '..', 'main.js'), 'utf8');
+    const mainSource = fs.readFileSync(
+        path.join(__dirname, '..', 'src', 'main', 'index.js'),
+        'utf8'
+    );
     const historyWindowFactory = mainSource.slice(
         mainSource.indexOf('function createHistoryWindow()'),
         mainSource.indexOf('function loadStations()')

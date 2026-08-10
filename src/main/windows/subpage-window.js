@@ -1,4 +1,4 @@
-const { resizeFixedWindow } = require('./window-sizing');
+const { resizeFixedWindow } = require('./sizing');
 
 function showWindowWhenReady(window) {
   const reveal = () => {

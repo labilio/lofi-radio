@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { resizeFixedWindow } = require('../window-sizing');
+const { resizeFixedWindow } = require('../src/main/windows/sizing');
 
 test('temporarily unlocks a fixed window so it can shrink programmatically', () => {
     const calls = [];

@@ -7,11 +7,11 @@
         content="default-src 'self'; script-src 'self' 'unsafe-inline'; media-src http: https: blob:; connect-src http: https:; style-src 'self' 'unsafe-inline'"
     >
     <title>Audio Player</title>
-    <script src="./node_modules/hls.js/dist/hls.min.js"></script>
+    <script src="../../../node_modules/hls.js/dist/hls.min.js"></script>
 </head>
 <body>
     <audio id="player" preload="auto"></audio>
-    <script src="./audio-runtime.js"></script>
+    <script src="../../shared/audio/runtime.js"></script>
     <script>
         if (window.audioPlayer && window.LofiAudioRuntime) {
             window.LofiAudioRuntime.bootAudioRuntime({

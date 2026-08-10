@@ -13,20 +13,27 @@ const asarPath = path.join(
   'app.asar'
 );
 
-test('package manifest includes the window shortcut prevention runtime module', () => {
+function listRuntimeFiles(relativeDirectory) {
+  const absoluteDirectory = path.join(projectRoot, relativeDirectory);
+  return fs.readdirSync(absoluteDirectory, { withFileTypes: true }).flatMap((entry) => {
+    const relativePath = path.join(relativeDirectory, entry.name);
+    return entry.isDirectory() ? listRuntimeFiles(relativePath) : [relativePath];
+  });
+}
+
+test('package manifest includes the process-organized runtime directories', () => {
   const packageJson = JSON.parse(
     fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
   );
 
-  assert.equal(packageJson.build.files.includes('window-shortcut-prevention.js'), true);
-});
-
-test('package manifest includes the audio output monitor runtime module', () => {
-  const packageJson = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
-  );
-
-  assert.equal(packageJson.build.files.includes('audio-output-monitor.js'), true);
+  assert.deepEqual(packageJson.build.files, [
+    'package.json',
+    'LICENSE',
+    'src/**/*',
+    'resources/**/*'
+  ]);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src', 'main', 'windows', 'shortcut-prevention.js')), true);
+  assert.equal(fs.existsSync(path.join(projectRoot, 'src', 'shared', 'audio', 'output-monitor.js')), true);
 });
 
 test('packaged app contains runtime files without local development artifacts', {
@@ -47,11 +54,12 @@ test('packaged app contains runtime files without local development artifacts', 
     `development artifacts found in app.asar (${forbidden.length} entries):\n${forbidden.slice(0, 30).join('\n')}`
   );
 
-  const packageJson = JSON.parse(
-    fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
-  );
-  const requiredRuntimeFiles = packageJson.build.files
-    .filter((entry) => typeof entry === 'string')
+  const requiredRuntimeFiles = [
+    'package.json',
+    'LICENSE',
+    ...listRuntimeFiles('src'),
+    ...listRuntimeFiles('resources')
+  ]
     .map((entry) => `\\${entry.replaceAll('/', '\\')}`);
 
   for (const required of requiredRuntimeFiles) {
@@ -59,9 +67,10 @@ test('packaged app contains runtime files without local development artifacts', 
   }
 
   const packagedEntrySet = new Set(entries);
-  const javascriptFiles = packageJson.build.files.filter(
-    (entry) => typeof entry === 'string' && entry.endsWith('.js')
-  );
+  const javascriptFiles = [
+    ...listRuntimeFiles('src'),
+    ...listRuntimeFiles('resources')
+  ].filter((entry) => entry.endsWith('.js'));
 
   for (const javascriptFile of javascriptFiles) {
     const sourcePath = path.join(projectRoot, javascriptFile);

@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const mainSource = fs.readFileSync(
-  path.resolve(__dirname, '..', 'main.js'),
+  path.resolve(__dirname, '..', 'src', 'main', 'index.js'),
   'utf8'
 );
 

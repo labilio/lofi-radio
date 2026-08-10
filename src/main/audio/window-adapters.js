@@ -1,5 +1,7 @@
 const path = require('path');
 
+const audioPagePath = path.resolve(__dirname, '..', '..', 'renderer', 'audio', 'index.html');
+
 class AudioWindowAdapter {
   constructor({ audioWindow, getVolume }) {
     this.audioWindow = audioWindow;
@@ -72,7 +74,7 @@ class LocalAudioAdapter extends AudioWindowAdapter {
   async load(request) {
     const generation = this._beginLoad(request);
     this.audioWindow.setSize(1, 1);
-    await this.audioWindow.loadFile(path.join(__dirname, 'audio.html'));
+    await this.audioWindow.loadFile(audioPagePath);
 
     if (this._isCurrent(generation)) {
       this._send('audio-command-load', request);

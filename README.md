@@ -22,7 +22,7 @@
 
 | 普通模式 | Mini 模式（灵动岛风格） |
 | :---: | :---: |
-| <img src="./images/normal-mode.png" width="400" alt="Lofi Radio 普通模式"/> | <img src="./images/mini-mode.png" width="300" alt="Lofi Radio Mini 模式"/> |
+| <img src="./docs/assets/screenshots/normal-mode.png" width="400" alt="Lofi Radio 普通模式"/> | <img src="./docs/assets/screenshots/mini-mode.png" width="300" alt="Lofi Radio Mini 模式"/> |
 | *黑胶唱片质感，电台和音量一眼可见* | *小巧玲珑，不占空间* |
 
 ## ⬇️ 下载与安装
@@ -189,6 +189,25 @@ Lofi Radio 于 2026.05 正式突破 200+ Stars！真的非常感谢大家的支�
 - HTML5 Audio + HLS.js - 流媒体播放
 - CSS3 - 毛玻璃效果与动画
 
+---
+
+## 🧭 项目结构
+
+项目按 Electron 的进程边界组织：
+
+```text
+src/main/       主进程、窗口与系统服务
+src/preload/    renderer 与主进程之间的安全桥接
+src/renderer/   按窗口组织的 HTML、CSS 和页面脚本
+src/shared/     跨进程复用的纯 JavaScript 模块
+resources/      电台数据与应用图标
+scripts/        开发和诊断脚本
+test/           自动化测试
+```
+
+具体职责和数据流见 [项目结构说明](./docs/architecture.md)。
+
+---
 ## 🚀 本地运行
 
 ```bash

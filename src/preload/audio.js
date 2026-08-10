@@ -1,7 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const { randomUUID } = require('node:crypto');
-const { BilibiliMediaAdapter } = require('./bilibili-media-adapter');
-const { watchAudioOutputDevices } = require('./audio-output-monitor');
+const { BilibiliMediaAdapter } = require('../shared/audio/bilibili-media-adapter');
+const { watchAudioOutputDevices } = require('../shared/audio/output-monitor');
 
 let bilibiliAdapter = null;
 let bilibiliSessionId = null;

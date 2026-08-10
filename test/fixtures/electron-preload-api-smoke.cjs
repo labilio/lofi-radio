@@ -17,7 +17,7 @@ async function inspectPreload() {
   const window = new BrowserWindow({
     show: false,
     webPreferences: {
-      preload: path.resolve(__dirname, '..', '..', 'preload.js'),
+      preload: path.resolve(__dirname, '..', '..', 'src', 'preload', 'main.js'),
       contextIsolation: true,
       nodeIntegration: false,
       partition: `lofi-preload-smoke-${process.pid}`

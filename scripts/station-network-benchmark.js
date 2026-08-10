@@ -5,7 +5,7 @@ const fs = require('node:fs/promises');
 const net = require('node:net');
 const dns = require('node:dns').promises;
 const { spawn, spawnSync } = require('node:child_process');
-const stations = require('../stations.json');
+const stations = require('../resources/stations.json');
 
 const projectRoot = path.resolve(__dirname, '..');
 
