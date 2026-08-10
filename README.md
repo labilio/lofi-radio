@@ -28,7 +28,7 @@
 | <img src="./docs/assets/screenshots/station-picker.png" width="400" alt="Lofi Radio 电台选择菜单"/> | <img src="./docs/assets/screenshots/automatic-update.png" width="400" alt="Lofi Radio 应用内自动更新"/> |
 | *Lo-fi、Hip-Hop、学习、放松等类型，展开菜单即可切换* | *Windows 版发现新版本后，直接在应用内下载并安装* |
 | 专注历史 | 个性化设置 |
-| <img src="./docs/assets/screenshots/focus-history.png" width="400" alt="Lofi Radio 专注历史"/> | <img src="./docs/assets/screenshots/settings.png" width="400" alt="Lofi Radio 偏好设置"/> |
+| <img src="./docs/assets/screenshots/focus-history.png" width="400" alt="Lofi Radio 专注历史"/> | <img src="./docs/assets/screenshots/settings.png" width="300" alt="Lofi Radio 偏好设置"/> |
 | *按周或按月回看专注时间，知道时间都花在了哪里* | *快捷键、开机自启、专注显示和副标题都能按习惯调整* |
 
 ## ⬇️ 下载与安装
